@@ -16,8 +16,8 @@ class UsersRepository:
         return user
 
     async def read(self, id: int) -> User:
-        result = await self.session.execute(select(User).where(User.telegram_id == id))
-        return result.scalar_one()
+        user = await self.session.execute(select(User).where(User.telegram_id == id))
+        return user.scalar_one()
 
     async def update(self, id: int, **kwargs) -> User:
         user = await self.read(id)

@@ -10,6 +10,6 @@ class Question(Base):
     __tablename__ = "questions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    question: Mapped[str] = mapped_column(String(384))
-    answer: Mapped[str] = mapped_column(String(384))
+    question_text: Mapped[str] = mapped_column(String(384))
+    answer_text: Mapped[str] = mapped_column(String(384))
     embedding: Mapped[np.ndarray] = mapped_column(Vector(1024))

@@ -153,33 +153,35 @@ async def process_fields_handler(
 
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
-async def user_update_confirm_cb_fields_handler(callback: CallbackQuery, state: FSMContext):
+async def user_update_confirm_cb_fields_handler(
+    callback: CallbackQuery, state: FSMContext
+):
     await callback.answer()
-    await process_fields_handler(
-        callback.message, state, send_action=SendAction.EDIT
-    )
+    await process_fields_handler(callback.message, state, send_action=SendAction.EDIT)
 
 
 @router.callback_query(CancelCallback.filter(F.dir == DIR))
-async def user_update_cancel_cb_fields_handler(callback: CallbackQuery, state: FSMContext):
+async def user_update_cancel_cb_fields_handler(
+    callback: CallbackQuery, state: FSMContext
+):
     await callback.answer()
-    await process_fields_handler(
-        callback.message, state, send_action=SendAction.EDIT
-    )
+    await process_fields_handler(callback.message, state, send_action=SendAction.EDIT)
 
 
 @router.callback_query(BackCallback.filter(F.dir == DIR))
-async def user_update_back_cb_fields_handler(callback: CallbackQuery, state: FSMContext):
+async def user_update_back_cb_fields_handler(
+    callback: CallbackQuery, state: FSMContext
+):
     await callback.answer()
-    await process_fields_handler(
-        callback.message, state, send_action=SendAction.EDIT
-    )
+    await process_fields_handler(callback.message, state, send_action=SendAction.EDIT)
 
 
 # Edit
 # Username
 @router.callback_query(EditCallback.filter(F.dir == DIR and F.field == "username"))
-async def user_update_cb_edit_username_handler(callback: CallbackQuery, state: FSMContext):
+async def user_update_cb_edit_username_handler(
+    callback: CallbackQuery, state: FSMContext
+):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
 
@@ -215,9 +217,7 @@ async def user_update_cb_edited_username_handler(
     input_username = callback_data.username
 
     await state.update_data(edited_username=input_username)
-    await process_fields_handler(
-        callback.message, state, send_action=SendAction.EDIT
-    )
+    await process_fields_handler(callback.message, state, send_action=SendAction.EDIT)
 
 
 # Role
@@ -253,9 +253,7 @@ async def user_update_cb_edited_role_handler(
     input_role = callback_data.role
 
     await state.update_data(edited_role=input_role)
-    await process_fields_handler(
-        callback.message, state, send_action=SendAction.EDIT
-    )
+    await process_fields_handler(callback.message, state, send_action=SendAction.EDIT)
 
 
 # Save
