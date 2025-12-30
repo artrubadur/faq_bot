@@ -1,6 +1,6 @@
 from typing import Awaitable, Callable
 
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup, Message
 
 import app.dialogs.markups.question as qmu
 import app.dialogs.markups.user as umu
@@ -11,12 +11,12 @@ from app.dialogs.actions import action_wrapper
 
 
 @action_wrapper
-async def send_settings_menu(send: Callable[..., Awaitable[None]]):
+async def send_settings_menu(send: Callable[..., Awaitable[Message]]) -> Message:
     reply_markup = InlineKeyboardMarkup(
         inline_keyboard=srows.section_rows() + rows.close_row()
     )
 
-    await send(
+    return await send(
         text=f"{EmojiMenu.SETTINGS} Settings",
         reply_markup=reply_markup,
     )
@@ -24,9 +24,9 @@ async def send_settings_menu(send: Callable[..., Awaitable[None]]):
 
 @action_wrapper
 async def send_users_menu(
-    send: Callable[..., Awaitable[None]],
-):
-    await send(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    return await send(
         text=f"{EmojiMenu.USERS} User Management",
         reply_markup=umu.main,
     )
@@ -34,9 +34,9 @@ async def send_users_menu(
 
 @action_wrapper
 async def send_questions_menu(
-    send: Callable[..., Awaitable[None]],
-):
-    await send(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    return await send(
         text=f"{EmojiMenu.QUESTIONS} Question Management",
         reply_markup=qmu.main,
     )

@@ -1,43 +1,44 @@
 from typing import Awaitable, Callable
 
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup, Message
 
 import app.dialogs.markups.question as mu
-import app.dialogs.rows.question as rows
+import app.dialogs.rows.question as qrows
+import app.dialogs.rows.base as brows
 from app.core.constants.emoji import EmojiAction, EmojiStatus
 from app.dialogs.actions import action_wrapper
-from app.utils.format.output import format_id, format_question_output
+from app.utils.format.output import format_edited_question, format_exception, format_id, format_question
 
 
 # Input
 @action_wrapper
 async def send_enter_id(
-    send: Callable[..., Awaitable[None]],
+    send: Callable[..., Awaitable[Message]],
     dir: str,
     found_question_id: int | None = None,
-):
+) -> Message:
     reply_markup = InlineKeyboardMarkup(
-        inline_keyboard=rows.id_row(dir, found_question_id)
+        inline_keyboard=qrows.id_row(dir, found_question_id)
     )
-    await send(
+    return await send(
         text=f"{EmojiAction.ENTER} Enter the question id", reply_markup=reply_markup
     )
 
 
 @action_wrapper
 async def send_enter_question_text(
-    send: Callable[..., Awaitable[None]],
-):
-    await send(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    return await send(
         text=f"{EmojiAction.ENTER} Enter the question text",
     )
 
 
 @action_wrapper
 async def send_enter_answer_text(
-    send: Callable[..., Awaitable[None]],
-):
-    await send(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    return await send(
         text=f"{EmojiAction.ENTER} Enter the answer text",
     )
 
@@ -45,14 +46,14 @@ async def send_enter_answer_text(
 # Creation
 @action_wrapper
 async def send_confirm_creation(
-    send: Callable[..., Awaitable[None]],
+    send: Callable[..., Awaitable[Message]],
     question_text: str,
     answer_text: str,
-):
-    await send(
+) -> Message:
+    return await send(
         text=(
             f"{EmojiAction.SELECT} Confirm creation?\n"
-            f"{format_question_output(
+            f"{format_question(
                     question_text=question_text,
                     answer_text=answer_text
                 )}"
@@ -64,15 +65,15 @@ async def send_confirm_creation(
 
 @action_wrapper
 async def send_successfully_created(
-    send: Callable[..., Awaitable[None]],
+    send: Callable[..., Awaitable[Message]],
     id: int,
     question_text: str,
     answer_text: str,
-):
-    await send(
+) -> Message:
+    return await send(
         text=(
             f"{EmojiStatus.SUCCESSFUL} Question has been successfully created:\n"
-            f"{format_question_output(id, question_text, answer_text)}"
+            f"{format_question(id, question_text, answer_text)}"
         ),
         parse_mode="HTML",
         reply_markup=mu.back,
@@ -81,14 +82,14 @@ async def send_successfully_created(
 
 @action_wrapper
 async def send_found_similar(
-    send: Callable[..., Awaitable[None]],
+    send: Callable[..., Awaitable[Message]],
     id: int,
     question_text: str,
-):
-    await send(
+) -> Message:
+    return await send(
         text=(
             f"{EmojiStatus.WARNING} A similar question already exists:\n"
-            f"{format_question_output(id, question_text)}\n"
+            f"{format_question(id, question_text)}\n"
             f"{EmojiAction.SELECT} Confirm creation?"
         ),
         parse_mode="HTML",
@@ -97,10 +98,10 @@ async def send_found_similar(
 
 
 # async def send_failed_creation( # TODO: USAGE
-#     send: Callable[..., Awaitable[None]],
+#     send: Callable[..., Awaitable[Message]],
 #     exception="Unexcepted error.",
-# ):
-#     await send(
+# ) -> Message:
+#     return await send(
 #         text=format_exception_output(f"Failed to create the question: {exception}"),
 #         reply_markup=mu.back,
 #     )
@@ -109,15 +110,15 @@ async def send_found_similar(
 # Finding
 @action_wrapper
 async def send_successfully_found(
-    send: Callable[..., Awaitable[None]],
+    send: Callable[..., Awaitable[Message]],
     id: int,
     question_text: str,
     answer_text: str,
-):
-    await send(
+) -> Message:
+    return await send(
         text=(
             f"{EmojiStatus.SUCCESSFUL} The question has been successfully found:\n"
-            f"{format_question_output(id, question_text, answer_text)}"
+            f"{format_question(id, question_text, answer_text)}"
         ),
         parse_mode="HTML",
         reply_markup=mu.back,
@@ -125,8 +126,8 @@ async def send_successfully_found(
 
 
 @action_wrapper
-async def send_not_found(send: Callable[..., Awaitable[None]], id: int):
-    await send(
+async def send_not_found(send: Callable[..., Awaitable[Message]], id: int) -> Message:
+    return await send(
         text=f"{EmojiStatus.FAILED} Question {format_id(id)} not found",
         parse_mode="HTML",
         reply_markup=mu.back,
@@ -136,12 +137,12 @@ async def send_not_found(send: Callable[..., Awaitable[None]], id: int):
 # Delition
 @action_wrapper
 async def send_confirm_deletion(
-    send: Callable[..., Awaitable[None]], id: int, question_text: str, answer_text: str
-):
-    await send(
+    send: Callable[..., Awaitable[Message]], id: int, question_text: str, answer_text: str
+) -> Message:
+    return await send(
         text=(
             f"{EmojiAction.SELECT} Confirm deletion?\n"
-            f"{format_question_output(id, question_text, answer_text)}"
+            f"{format_question(id, question_text, answer_text)}"
         ),
         parse_mode="HTML",
         reply_markup=mu.confirm_deletion,
@@ -150,16 +151,121 @@ async def send_confirm_deletion(
 
 @action_wrapper
 async def send_successfully_deleted(
-    send: Callable[..., Awaitable[None]],
+    send: Callable[..., Awaitable[Message]],
     id: int,
     question_text: str,
     answer_text: str,
-):
-    await send(
+) -> Message:
+    return await send(
         text=(
             f"{EmojiStatus.SUCCESSFUL} Next question has been successfully deleted:\n"
-            f"{format_question_output(id, question_text, answer_text)}"
+            f"{format_question(id, question_text, answer_text)}"
         ),
         parse_mode="HTML",
         reply_markup=mu.back,
     )
+
+
+# Update
+@action_wrapper
+async def send_confirm_update(
+    send: Callable[..., Awaitable[Message]],
+    id: int,
+    question_text: str,
+    answer_text: str,
+) -> Message:
+    return await send(
+        text=(
+            f"{EmojiAction.SELECT} Update this question?\n"
+            f"{format_question(id, question_text, answer_text)}"),
+        parse_mode="HTML",
+        reply_markup=mu.confirm_update,
+    )
+
+@action_wrapper
+async def send_changes(
+    send: Callable[..., Awaitable[Message]],
+    id: int,
+    question_text: str,
+    edited_question_text: str,
+    answer_text: str,
+    edited_answer_text: str,
+    recompute_embedding: bool
+) -> Message:
+    changes_text = format_edited_question(
+        id, 
+        question_text,
+        edited_question_text,
+        answer_text,
+        edited_answer_text,
+        recompute_embedding
+    )
+    return await send(
+        text=f"{changes_text}{EmojiAction.SELECT} Select the field to edit:",
+        parse_mode="HTML",
+        reply_markup=mu.field_save_update,
+    )
+
+@action_wrapper
+async def send_edit_question_text(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    reply_markup = InlineKeyboardMarkup(
+        inline_keyboard=brows.cancel_row("settings.questions.update", "update")
+    )
+
+    return await send(
+        text=f"{EmojiAction.ENTER} Enter the question text",
+        reply_markup=reply_markup,
+    )
+
+@action_wrapper
+async def send_edit_answer_text(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    reply_markup = InlineKeyboardMarkup(
+        inline_keyboard=brows.cancel_row("settings.questions.update", "update")
+    )
+
+    return await send(
+        text=f"{EmojiAction.ENTER} Enter the answer text",
+        reply_markup=reply_markup,
+    )
+    
+@action_wrapper
+async def send_confirm_recompute(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    return await send(
+        text=f"{EmojiAction.SELECT} Recompute embedding?",
+        parse_mode="HTML",
+        reply_markup=mu.confirm_recompute,
+    )
+
+
+@action_wrapper
+async def send_successfully_updated(
+    send: Callable[..., Awaitable[Message]],
+    id: int,
+    question_text: str,
+    answer_text: str,
+) -> Message:
+    return await send(
+        text=(
+            f"{EmojiStatus.SUCCESSFUL} The question has been successfully updated:\n"
+            f"{format_question(id, question_text, answer_text)}"
+            ),
+        parse_mode="HTML",
+        reply_markup=mu.back,
+    )
+
+
+# @action_wrapper
+# async def send_failed_update(
+#     send: Callable[..., Awaitable[Message]],
+#     exception="Unexcepted error.",
+# ) -> Message:
+#     return await send(
+#         text=format_exception(f"Failed to update the question: {exception}"),
+#         reply_markup=mu.back,
+#     )

@@ -1,6 +1,6 @@
 from typing import Awaitable, Callable
 
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup, Message
 
 import app.dialogs.rows.base as rows
 from app.core.constants.emoji import EmojiStatus
@@ -9,11 +9,11 @@ from app.dialogs.actions import action_wrapper
 
 @action_wrapper
 async def send_invalid(
-    send: Callable[..., Awaitable[None]], dir: str, text: str | None
-):
+    send: Callable[..., Awaitable[Message]], dir: str, text: str | None
+) -> Message:
     reply_markup = InlineKeyboardMarkup(inline_keyboard=rows.back_row(dir))
 
-    await send(
+    return await send(
         text=f"{EmojiStatus.WARNING} {text}. Retry or back",
         reply_markup=reply_markup,
     )

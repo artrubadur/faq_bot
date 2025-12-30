@@ -12,28 +12,31 @@ class SendAction(str, Enum):
     EDIT = "edit"
 
 
-async def do_action(message: Message, action: SendAction, **kwargs):
+async def do_action(message: Message, action: SendAction, **kwargs) -> Message:
     match action:
         case SendAction.EDIT:
-            await message.edit_text(**kwargs)
+            return await message.edit_text(**kwargs) # type: ignore
+            
         case SendAction.REPLY:
-            await message.reply(**kwargs)
+            return await message.reply(**kwargs)
+
         case SendAction.REPLY_DOCUMENT:
-            await message.reply_document(**kwargs)
+            return await message.reply_document(**kwargs)
+
         case _:
-            await message.answer(**kwargs)
+            return await message.answer(**kwargs)
 
 
 P = ParamSpec("P")
 
 
 def action_wrapper(
-    func: Callable[Concatenate[Callable, P], Awaitable[Any]],
+    func: Callable[Concatenate[Callable[..., Awaitable[Message]], P], Awaitable[Any]],
 ) -> Callable[Concatenate[Message, SendAction, P], Awaitable[Any]]:
     @wraps(func)
     async def inner(message: Message, action: SendAction, *args, **kwargs):
         async def send(**data):
-            await do_action(message, action, **data)
+            return await do_action(message, action, **data)
 
         return await func(
             send,
