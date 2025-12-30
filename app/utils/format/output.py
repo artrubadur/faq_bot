@@ -1,5 +1,3 @@
-from typing import Optional
-
 from app.core.constants.emoji import EmojiStatus, EmojiSymbol
 
 
@@ -7,11 +5,11 @@ def format_id(id: int):
     return f"<code>{id}</code>"
 
 
-def format_user_link(id: int, username: Optional[str]):
+def format_user_link(id: int, username: str | None):
     return f"<a href='tg://user?id={id}'>@{username or "N/A"}</a>"
 
 
-def format_username(username: Optional[str]):
+def format_username(username: str | None):
     return f"<code>{username or "N/A"}</code>"
 
 
@@ -20,7 +18,7 @@ def format_user_role(role: str):
 
 
 def format_user_output(
-    id: int, username: Optional[str] = None, role: Optional[str] = None
+    id: int, username: str | None = None, role: str | None = None
 ) -> str:
     rows = [f"Link: {format_user_link(id, username)}", f"ID: {format_id(id)}"]
 
@@ -35,8 +33,8 @@ def format_user_output(
 def format_edited_user_output(
     id: int,
     edited_id: int,
-    username: Optional[str],
-    edited_username: Optional[str],
+    username: str | None,
+    edited_username: str | None,
     role: str,
     edited_role: str,
 ):
@@ -51,7 +49,7 @@ def format_edited_user_output(
     )
 
 
-def format_exception_output(exception: Optional[str] = None):
+def format_exception_output(exception: str | None = None):
     return f"{EmojiStatus.FAILED} {exception or ""}."
 
 
