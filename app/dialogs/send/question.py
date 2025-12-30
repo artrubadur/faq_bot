@@ -1,6 +1,9 @@
 from typing import Awaitable, Callable
 
+from aiogram.types import InlineKeyboardMarkup
+
 import app.dialogs.markups.question as mu
+import app.dialogs.rows.question as rows
 from app.core.constants.emoji import EmojiAction, EmojiStatus
 from app.dialogs.actions import action_wrapper
 from app.utils.format.output import format_id, format_question_output
@@ -8,11 +11,16 @@ from app.utils.format.output import format_id, format_question_output
 
 # Input
 @action_wrapper
-async def send_enter_question_id(
+async def send_enter_id(
     send: Callable[..., Awaitable[None]],
+    dir: str,
+    found_question_id: int | None = None,
 ):
+    reply_markup = InlineKeyboardMarkup(
+        inline_keyboard=rows.id_row(dir, found_question_id)
+    )
     await send(
-        text=f"{EmojiAction.ENTER} Enter the question id",
+        text=f"{EmojiAction.ENTER} Enter the question id", reply_markup=reply_markup
     )
 
 

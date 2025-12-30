@@ -35,7 +35,7 @@ class Creation(StatesGroup):
 
 
 @router.callback_query(F.data == DIR)
-async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
+async def question_create_cb_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
@@ -47,7 +47,9 @@ async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(Creation.waiting_for_question_text)
-async def user_create_msg_question_text_handler(message: Message, state: FSMContext):
+async def question_create_msg_question_text_handler(
+    message: Message, state: FSMContext
+):
     try:
         input_question_text = await process_question_text_msg(message)
     except ValueError as e:
@@ -61,7 +63,7 @@ async def user_create_msg_question_text_handler(message: Message, state: FSMCont
 
 
 @router.message(Creation.waiting_for_answer_text)
-async def user_create_msg_answer_text_handler(message: Message, state: FSMContext):
+async def question_create_msg_answer_text_handler(message: Message, state: FSMContext):
     try:
         input_answer_text = await process_answer_text_msg(message)
     except ValueError as e:
@@ -80,7 +82,7 @@ async def user_create_msg_answer_text_handler(message: Message, state: FSMContex
 
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR and F.step == "create"))
-async def user_create_cb_create_confirm_handler(
+async def question_create_cb_create_confirm_handler(
     callback: CallbackQuery, state: FSMContext
 ):
     await callback.answer()
@@ -117,7 +119,7 @@ async def user_create_cb_create_confirm_handler(
 
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR and F.step == "similar"))
-async def user_create_cb_similar_confirm_handler(
+async def question_create_cb_similar_confirm_handler(
     callback: CallbackQuery, state: FSMContext
 ):
     await callback.answer()

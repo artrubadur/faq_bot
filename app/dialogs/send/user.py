@@ -19,14 +19,14 @@ from app.utils.format.output import (
 async def send_enter_identity(
     send: Callable[..., Awaitable[None]],
     dir: str,
-    found_id: int | None = None,
+    found_user_id: int | None = None,
     found_username: str | None = None,
     sender_id: int | None = None,
     sender_username: str | None = None,
 ):
     reply_markup = InlineKeyboardMarkup(
         inline_keyboard=urows.identity_rows(
-            dir, found_id, found_username, sender_id, sender_username
+            dir, found_user_id, found_username, sender_id, sender_username
         )
     )
     await send(

@@ -36,14 +36,14 @@ async def user_get_cb_handler(callback: CallbackQuery, state: FSMContext):
     sender_id = callback.from_user.id
     sender_username = callback.from_user.username
     data = await state.get_data()
-    found_id: int | None = data.get("found_id", None)
+    found_user_id: int | None = data.get("found_user_id", None)
     found_username = data.get("found_username", None)
 
     await send_enter_identity(
         callback.message,
         SendAction.EDIT,
         DIR,
-        found_id,
+        found_user_id,
         found_username,
         sender_id,
         sender_username,
@@ -65,7 +65,7 @@ async def process_identity_handler(
         try:
             user = await service.read_user(input_id)
             await state.update_data(
-                found_id=user.telegram_id, found_username=user.username
+                found_user_id=user.telegram_id, found_username=user.username
             )
             await send_successfully_found(
                 message,
@@ -75,7 +75,9 @@ async def process_identity_handler(
                 user.role,
             )
         except NoResultFound:
-            await state.update_data(found_id=input_id, found_username=input_username)
+            await state.update_data(
+                found_user_id=input_id, found_username=input_username
+            )
             await send_partially_found(message, send_action, input_id, input_username)
 
     await state.set_state(None)
@@ -105,5 +107,5 @@ async def user_get_cb_identity_handler(
     input_username = callback_data.username
 
     await process_identity_handler(
-        callback.message, state, input_id, input_username, send_action="edit"
+        callback.message, state, input_id, input_username, send_action=SendAction.EDIT
     )

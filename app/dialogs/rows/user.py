@@ -13,20 +13,20 @@ class IdentityCallback(CallbackData, prefix="identity"):
 
 def identity_rows(
     dir: str,
-    found_id: int | None = None,
+    found_user_id: int | None = None,
     found_username: str | None = None,
     sender_id: int | None = None,
     sender_username: str | None = None,
 ):
     rows = []
-    if found_id is not None:
+    if found_user_id is not None:
         callback_data = IdentityCallback(
-            dir=dir, id=found_id, username=found_username
+            dir=dir, id=found_user_id, username=found_username
         ).pack()
         rows.append(
             [
                 InlineKeyboardButton(
-                    text=f"Found ({found_username or found_id})",
+                    text=f"Found ({found_username or found_user_id})",
                     callback_data=callback_data,
                 )
             ]

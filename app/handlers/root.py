@@ -19,9 +19,7 @@ async def cmd_start(message: Message):
 async def cmd_goto(message: Message, command: CommandObject):
     input_path = command.args
     if input_path is None:
-        await send_invalid_path(
-            message, SendAction.ANSWER, "The path is not set"
-        )
+        await send_invalid_path(message, SendAction.ANSWER, "The path is not set")
         return
 
     await send_confirm_goto(message, SendAction.ANSWER, input_path)

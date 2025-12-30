@@ -36,14 +36,14 @@ async def user_delete_cb_handler(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_reply_markup(reply_markup=None)
 
     data = await state.get_data()
-    found_id: int | None = data.get("found_id", None)
+    found_user_id: int | None = data.get("found_user_id", None)
     found_username = data.get("found_username", None)
 
     await send_enter_identity(
         callback.message,
         SendAction.EDIT,
         DIR,
-        found_id,
+        found_user_id,
         found_username,
     )
     await state.set_state(Deletion.waiting_for_identity)

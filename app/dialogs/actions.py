@@ -1,9 +1,8 @@
 from enum import Enum
 from functools import wraps
-from typing import Any, Awaitable, Callable, ParamSpec
+from typing import Any, Awaitable, Callable, ParamSpec, Concatenate
 
 from aiogram.types import Message
-from typing_extensions import Concatenate, ParamSpec
 
 
 class SendAction(str, Enum):

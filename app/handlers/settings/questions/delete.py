@@ -7,10 +7,11 @@ from sqlalchemy.exc import NoResultFound
 
 from app.dialogs import SendAction
 from app.dialogs.rows.base import ConfirmCallback
+from app.dialogs.rows.question import IdCallback
 from app.dialogs.send.base import send_invalid
 from app.dialogs.send.question import (
     send_confirm_deletion,
-    send_enter_question_id,
+    send_enter_id,
     send_not_found,
     send_successfully_deleted,
 )
@@ -34,21 +35,16 @@ async def question_get_cb_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    await send_enter_question_id(
-        callback.message,
-        SendAction.EDIT,
-    )
+    data = await state.get_data()
+    found_question_id: int | None = data.get("found_question_id", None)
+
+    await send_enter_id(callback.message, SendAction.EDIT, DIR, found_question_id)
     await state.set_state(Deletion.waiting_for_id)
 
 
-@router.message(Deletion.waiting_for_id)
-async def user_delete_msg_identity_handler(message: Message, state: FSMContext):
-    try:
-        input_id = await process_id_msg(message)
-    except ValueError as e:
-        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
-        return
-
+async def process_id_handler(
+    message: Message, state: FSMContext, input_id: int, *, send_action: SendAction
+):
     await state.update_data(input_id=input_id)
 
     async with async_session() as session:
@@ -69,8 +65,35 @@ async def user_delete_msg_identity_handler(message: Message, state: FSMContext):
     await state.set_state(None)
 
 
+@router.message(Deletion.waiting_for_id)
+async def user_delete_msg_identity_handler(message: Message, state: FSMContext):
+    try:
+        input_id = await process_id_msg(message)
+    except ValueError as e:
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
+        return
+
+    await process_id_handler(message, state, input_id, send_action=SendAction.ANSWER)
+
+
+@router.callback_query(IdCallback.filter(F.dir == DIR))
+async def user_delete_cb_identity_handler(
+    callback: CallbackQuery, callback_data: IdCallback, state: FSMContext
+):
+    await callback.answer("")
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+    input_id = callback_data.id
+
+    await process_id_handler(
+        callback.message, state, input_id, send_action=SendAction.EDIT
+    )
+
+
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
-async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: FSMContext):
+async def question_delete_cb_confirm_handler(
+    callback: CallbackQuery, state: FSMContext
+):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 

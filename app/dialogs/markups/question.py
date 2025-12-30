@@ -24,3 +24,17 @@ confirm_similar = InlineKeyboardMarkup(
 confirm_deletion = InlineKeyboardMarkup(
     inline_keyboard=rows.confirm_row(f"{DIR}.delete", DIR)
 )
+
+confirm_update = InlineKeyboardMarkup(
+    inline_keyboard=rows.confirm_row(f"{DIR}.update", DIR, "update")
+)
+
+confirm_recompute_update = InlineKeyboardMarkup(
+    inline_keyboard=rows.confirm_row(f"{DIR}.update", DIR, "recompute")
+)
+
+field_save_update = InlineKeyboardMarkup(
+    inline_keyboard=rows.field_rows(
+        f"{DIR}.update", DIR, ["Question Text", "Answer Text"]
+    )
+)
