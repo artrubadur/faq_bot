@@ -13,7 +13,7 @@ DIR = "settings"
 
 @router.message(Command(DIR))
 async def cmd_handler(message: Message):
-    await send_settings_menu(message, action=SendAction.ANSWER)
+    await send_settings_menu(message, SendAction.ANSWER)
 
 
 @router.callback_query(BackCallback.filter(F.dir == DIR))
@@ -21,4 +21,4 @@ async def cb_back_handler(callback: CallbackQuery):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    await send_settings_menu(callback.message, action=SendAction.EDIT)
+    await send_settings_menu(callback.message, SendAction.EDIT)

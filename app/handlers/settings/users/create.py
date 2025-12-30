@@ -49,10 +49,10 @@ async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
 
     await send_enter_identity(
         callback.message,
+        SendAction.EDIT,
         DIR,
         found_id,
         found_username,
-        action=SendAction.EDIT,
     )
     await state.set_state(Creation.waiting_for_identity)
 
@@ -71,10 +71,10 @@ async def process_identity_handler(
         data = await state.get_data()
         found_username = data.get("found_username", None)
 
-        await send_enter_username(message, DIR, found_username, action=send_action)
+        await send_enter_username(message, send_action, DIR, found_username)
         await state.set_state(Creation.waiting_for_username)
     else:
-        await send_select_role(message, DIR, action=send_action)
+        await send_select_role(message, send_action, DIR)
         await state.set_state(Creation.waiting_for_role)
 
 
@@ -83,7 +83,7 @@ async def user_create_msg_identity_handler(message: Message, state: FSMContext):
     try:
         input_id, input_username = await process_identity_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await process_identity_handler(
@@ -115,7 +115,7 @@ async def process_username_handler(
 ):
     await state.update_data(input_username=input_username)
 
-    await send_select_role(message, DIR, action=send_action)
+    await send_select_role(message, send_action, DIR)
     await state.set_state(Creation.waiting_for_role)
 
 
@@ -124,7 +124,7 @@ async def user_create_msg_username_handler(message: Message, state: FSMContext):
     try:
         input_username = await process_username_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await process_username_handler(
@@ -156,7 +156,7 @@ async def process_role_handler(
     input_username: str | None = data["input_username"]
 
     await send_confirm_creation(
-        message, input_id, input_username, input_role, action=send_action
+        message, send_action, input_id, input_username, input_role
     )
     await state.set_state(None)
 
@@ -166,7 +166,7 @@ async def user_create_msg_role_handler(message: Message, state: FSMContext):
     try:
         input_role = await process_role_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await process_role_handler(
@@ -205,12 +205,12 @@ async def user_create_cb_confirm_handler(callback: CallbackQuery, state: FSMCont
             user = await service.create_user(input_id, input_username, input_role)
             await send_successfully_created(
                 callback.message,
+                SendAction.EDIT,
                 user.telegram_id,
                 user.username,
                 user.role,
-                action=SendAction.EDIT,
             )
         except IntegrityError:
             await send_failed_creation(
-                callback.message, "User already exists.", action=SendAction.EDIT
+                callback.message, SendAction.EDIT, "User already exists."
             )

@@ -41,7 +41,7 @@ async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
 
     await send_enter_question_text(
         callback.message,
-        action=SendAction.EDIT,
+        SendAction.EDIT,
     )
     await state.set_state(Creation.waiting_for_question_text)
 
@@ -51,12 +51,12 @@ async def user_create_msg_question_text_handler(message: Message, state: FSMCont
     try:
         input_question_text = await process_question_text_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await state.update_data(input_question_text=input_question_text)
 
-    await send_enter_answer_text(message, action=SendAction.ANSWER)
+    await send_enter_answer_text(message, SendAction.ANSWER)
     await state.set_state(Creation.waiting_for_answer_text)
 
 
@@ -65,7 +65,7 @@ async def user_create_msg_answer_text_handler(message: Message, state: FSMContex
     try:
         input_answer_text = await process_answer_text_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await state.update_data(input_answer_text=input_answer_text)
@@ -74,7 +74,7 @@ async def user_create_msg_answer_text_handler(message: Message, state: FSMContex
     input_question_text: str = data["input_question_text"]
 
     await send_confirm_creation(
-        message, input_question_text, input_answer_text, action=SendAction.ANSWER
+        message, SendAction.ANSWER, input_question_text, input_answer_text
     )
     await state.set_state(None)
 
@@ -102,17 +102,17 @@ async def user_create_cb_create_confirm_handler(
             del data["input_question_text"], data["input_answer_text"]
             await send_successfully_created(
                 callback.message,
+                SendAction.EDIT,
                 qustion.id,
                 qustion.question_text,
                 qustion.answer_text,
-                action=SendAction.EDIT,
             )
         except SimilarityError as e:
             await send_found_similar(
                 callback.message,
+                SendAction.EDIT,
                 e.question.id,
                 e.question.question_text,
-                action=SendAction.EDIT,
             )
 
 
@@ -137,8 +137,8 @@ async def user_create_cb_similar_confirm_handler(
         )
         await send_successfully_created(
             callback.message,
+            SendAction.EDIT,
             question.id,
             question.question_text,
             question.answer_text,
-            action=SendAction.EDIT,
         )

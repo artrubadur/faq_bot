@@ -57,10 +57,10 @@ async def user_update_cb_handler(callback: CallbackQuery, state: FSMContext):
 
     await send_enter_identity(
         callback.message,
+        SendAction.EDIT,
         DIR,
         found_id,
         found_username,
-        action=SendAction.EDIT,
     )
     await state.set_state(Update.waiting_for_identity)
 
@@ -85,13 +85,13 @@ async def process_identity_handler(
             )
             await send_confirm_update(
                 message,
+                send_action,
                 user.telegram_id,
                 user.username,
                 user.role.value,
-                action=send_action,
             )
         except NoResultFound:
-            await send_not_found(message, input_id, input_username, action=send_action)
+            await send_not_found(message, send_action, input_id, input_username)
 
     await state.set_state(None)
 
@@ -101,7 +101,7 @@ async def user_update_msg_identity_handler(message: Message, state: FSMContext):
     try:
         input_id, input_username = await process_identity_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await process_identity_handler(
@@ -138,13 +138,13 @@ async def process_fields_handler(
 
     await send_changes(
         message,
+        send_action,
         id,
         edited_id,
         username,
         edited_username,
         role,
         edited_role,
-        action=send_action,
     )
 
     await state.set_state(None)
@@ -184,9 +184,7 @@ async def user_update_cb_edit_username_handler(
     data = await state.get_data()
     found_username = data.get("found_username", None)
 
-    await send_edit_username(
-        callback.message, DIR, found_username, action=SendAction.EDIT
-    )
+    await send_edit_username(callback.message, SendAction.EDIT, DIR, found_username)
     await state.set_state(Update.waiting_for_username)
 
 
@@ -195,7 +193,7 @@ async def user_update_msg_edited_username_handler(message: Message, state: FSMCo
     try:
         input_username = await process_username_msg(message)
     except ValueError as e:
-        await send_invalid(message, DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, DIR, str(e))
         return
 
     await state.update_data(edited_username=input_username)
@@ -221,7 +219,7 @@ async def user_update_msg_edit_role_handler(callback: CallbackQuery, state: FSMC
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    await send_edit_role(callback.message, DIR, action=SendAction.EDIT)
+    await send_edit_role(callback.message, SendAction.EDIT, DIR)
     await state.set_state(Update.waiting_for_role)
 
 
@@ -230,7 +228,7 @@ async def user_update_msg_edited_role_handler(message: Message, state: FSMContex
     try:
         input_role = await process_role_msg(message)
     except ValueError as e:
-        await send_invalid(message, DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, DIR, str(e))
         return
 
     await state.update_data(edited_role=input_role)
@@ -273,14 +271,14 @@ async def user_update_cb_save_handler(callback: CallbackQuery, state: FSMContext
             user = await service.update_user(id, edited_username, edited_role)
             await send_successfully_updated(
                 callback.message,
+                SendAction.EDIT,
                 user.telegram_id,
                 user.username,
                 user.role,
-                action=SendAction.EDIT,
             )
         except NoResultFound:
-            await send_not_found(callback.message, id, username, action=SendAction.EDIT)
+            await send_not_found(callback.message, SendAction.EDIT, id, username)
         except IntegrityError:
             await send_failed_update(
-                callback.message, "Username already claimed.", action=SendAction.EDIT
+                callback.message, SendAction.EDIT, "Username already claimed."
             )

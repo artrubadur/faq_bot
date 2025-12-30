@@ -14,7 +14,7 @@ DIR = "settings.users"
 @router.callback_query(F.data == DIR)
 async def user_cb_handler(callback: CallbackQuery):
     await callback.answer()
-    await send_users_menu(callback.message, action=SendAction.EDIT)
+    await send_users_menu(callback.message, SendAction.EDIT)
 
 
 @router.callback_query(BackCallback.filter(F.dir == DIR))
@@ -22,7 +22,7 @@ async def user_back_cb_handler(callback: CallbackQuery):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    await send_users_menu(callback.message, action=SendAction.ANSWER)
+    await send_users_menu(callback.message, SendAction.ANSWER)
 
 
 @router.callback_query(CancelCallback.filter(F.dir == DIR))
@@ -34,4 +34,4 @@ async def user_cancel_cb_handler(callback: CallbackQuery):
         parse_mode="HTML",
     )
 
-    await send_users_menu(callback.message, action=SendAction.ANSWER)
+    await send_users_menu(callback.message, SendAction.ANSWER)

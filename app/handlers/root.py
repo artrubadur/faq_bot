@@ -11,7 +11,8 @@ router = Router()
 
 @router.message(CommandStart())
 async def cmd_start(message: Message):
-    await send_start(message, action=SendAction.REPLY_DOCUMENT)
+    full_name = message.from_user.full_name
+    await send_start(message, SendAction.REPLY_DOCUMENT, full_name)
 
 
 @router.message(Command("goto"))
@@ -19,11 +20,11 @@ async def cmd_goto(message: Message, command: CommandObject):
     input_path = command.args
     if input_path is None:
         await send_invalid_path(
-            message, exception="The path is not set", action=SendAction.ANSWER
+            message, SendAction.ANSWER, "The path is not set"
         )
         return
 
-    await send_confirm_goto(message, input_path, action=SendAction.ANSWER)
+    await send_confirm_goto(message, SendAction.ANSWER, input_path)
 
 
 @router.callback_query(CloseCallback.filter())

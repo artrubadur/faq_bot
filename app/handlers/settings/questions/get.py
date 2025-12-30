@@ -34,7 +34,7 @@ async def question_get_cb_handler(callback: CallbackQuery, state: FSMContext):
 
     await send_enter_question_id(
         callback.message,
-        action=SendAction.EDIT,
+        SendAction.EDIT,
     )
     await state.set_state(Finding.waiting_for_id)
 
@@ -44,7 +44,7 @@ async def question_get_msg_identity_handler(message: Message, state: FSMContext)
     try:
         input_id = await process_id_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     async with async_session() as session:
@@ -54,12 +54,12 @@ async def question_get_msg_identity_handler(message: Message, state: FSMContext)
             question = await service.read_question(input_id)
             await send_successfully_found(
                 message,
+                SendAction.ANSWER,
                 question.id,
                 question.question_text,
                 question.answer_text,
-                action=SendAction.ANSWER,
             )
         except NoResultFound:
-            await send_not_found(message, input_id, action=SendAction.ANSWER)
+            await send_not_found(message, SendAction.ANSWER, input_id)
 
     await state.set_state(None)

@@ -1,39 +1,42 @@
-from aiogram.types import InlineKeyboardMarkup, Message
+from typing import Awaitable, Callable
+
+from aiogram.types import InlineKeyboardMarkup
 
 import app.dialogs.markups.question as qmu
 import app.dialogs.markups.user as umu
 import app.dialogs.rows.base as rows
 import app.dialogs.rows.settings as srows
 from app.core.constants.emoji import EmojiMenu
-from app.dialogs.actions import SendAction, do_action
+from app.dialogs.actions import action_wrapper
 
 
-async def send_settings_menu(message: Message, *, action: SendAction):
+@action_wrapper
+async def send_settings_menu(send: Callable[..., Awaitable[None]]):
     reply_markup = InlineKeyboardMarkup(
         inline_keyboard=srows.section_rows() + rows.close_row()
     )
 
-    await do_action(
-        message,
-        action,
+    await send(
         text=f"{EmojiMenu.SETTINGS} Settings",
         reply_markup=reply_markup,
     )
 
 
-async def send_users_menu(message: Message, *, action: SendAction):
-    await do_action(
-        message,
-        action,
+@action_wrapper
+async def send_users_menu(
+    send: Callable[..., Awaitable[None]],
+):
+    await send(
         text=f"{EmojiMenu.USERS} User Management",
         reply_markup=umu.main,
     )
 
 
-async def send_questions_menu(message: Message, *, action: SendAction):
-    await do_action(
-        message,
-        action,
+@action_wrapper
+async def send_questions_menu(
+    send: Callable[..., Awaitable[None]],
+):
+    await send(
         text=f"{EmojiMenu.QUESTIONS} Question Management",
         reply_markup=qmu.main,
     )

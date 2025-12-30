@@ -41,12 +41,12 @@ async def user_get_cb_handler(callback: CallbackQuery, state: FSMContext):
 
     await send_enter_identity(
         callback.message,
+        SendAction.EDIT,
         DIR,
         found_id,
         found_username,
         sender_id,
         sender_username,
-        action=SendAction.EDIT,
     )
     await state.set_state(Finding.waiting_for_identity)
 
@@ -69,16 +69,14 @@ async def process_identity_handler(
             )
             await send_successfully_found(
                 message,
+                send_action,
                 user.telegram_id,
                 user.username,
                 user.role,
-                action=send_action,
             )
         except NoResultFound:
             await state.update_data(found_id=input_id, found_username=input_username)
-            await send_partially_found(
-                message, input_id, input_username, action=send_action
-            )
+            await send_partially_found(message, send_action, input_id, input_username)
 
     await state.set_state(None)
 
@@ -88,7 +86,7 @@ async def user_get_msg_identity_handler(message: Message, state: FSMContext):
     try:
         input_id, input_username = await process_identity_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await process_identity_handler(

@@ -41,10 +41,10 @@ async def user_delete_cb_handler(callback: CallbackQuery, state: FSMContext):
 
     await send_enter_identity(
         callback.message,
+        SendAction.EDIT,
         DIR,
         found_id,
         found_username,
-        action=SendAction.EDIT,
     )
     await state.set_state(Deletion.waiting_for_identity)
 
@@ -66,13 +66,13 @@ async def process_identity_handler(
             user = await service.read_user(input_id)
             await send_confirm_deletion(
                 message,
+                send_action,
                 user.telegram_id,
                 user.username,
                 user.role.value,
-                action=send_action,
             )
         except NoResultFound:
-            await send_not_found(message, input_id, input_username, action=send_action)
+            await send_not_found(message, send_action, input_id, input_username)
 
     await state.set_state(None)
 
@@ -82,7 +82,7 @@ async def user_delete_msg_identity_handler(message: Message, state: FSMContext):
     try:
         input_id, input_username = await process_identity_msg(message)
     except ValueError as e:
-        await send_invalid(message, PARENT_DIR, str(e), action=SendAction.ANSWER)
+        await send_invalid(message, SendAction.ANSWER, PARENT_DIR, str(e))
         return
 
     await process_identity_handler(
@@ -120,12 +120,12 @@ async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: FSMCont
             user = await service.delete_user(input_id)
             await send_successfully_deleted(
                 callback.message,
+                SendAction.EDIT,
                 user.telegram_id,
                 user.username,
                 user.role,
-                action=SendAction.EDIT,
             )
         except NoResultFound:
-            await send_not_found(callback.message, input_id, action=SendAction.EDIT)
+            await send_not_found(callback.message, SendAction.EDIT, input_id)
 
     await state.set_state(None)

@@ -1,59 +1,47 @@
-from aiogram.types import Message
+from typing import Awaitable, Callable
 
 import app.dialogs.markups.question as mu
 from app.core.constants.emoji import EmojiAction, EmojiStatus
-from app.dialogs.actions import SendAction, do_action
+from app.dialogs.actions import action_wrapper
 from app.utils.format.output import format_id, format_question_output
 
 
 # Input
+@action_wrapper
 async def send_enter_question_id(
-    message: Message,
-    *,
-    action: SendAction,
+    send: Callable[..., Awaitable[None]],
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=f"{EmojiAction.ENTER} Enter the question id",
     )
 
 
+@action_wrapper
 async def send_enter_question_text(
-    message: Message,
-    *,
-    action: SendAction,
+    send: Callable[..., Awaitable[None]],
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=f"{EmojiAction.ENTER} Enter the question text",
     )
 
 
+@action_wrapper
 async def send_enter_answer_text(
-    message: Message,
-    *,
-    action: SendAction,
+    send: Callable[..., Awaitable[None]],
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=f"{EmojiAction.ENTER} Enter the answer text",
     )
 
 
 # Creation
+@action_wrapper
 async def send_confirm_creation(
-    message: Message,
+    send: Callable[..., Awaitable[None]],
     question_text: str,
     answer_text: str,
-    *,
-    action: SendAction,
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=(
             f"{EmojiAction.SELECT} Confirm creation?\n"
             f"{format_question_output(
@@ -66,17 +54,14 @@ async def send_confirm_creation(
     )
 
 
+@action_wrapper
 async def send_successfully_created(
-    message: Message,
+    send: Callable[..., Awaitable[None]],
     id: int,
     question_text: str,
     answer_text: str,
-    *,
-    action: SendAction,
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=(
             f"{EmojiStatus.SUCCESSFUL} Question has been successfully created:\n"
             f"{format_question_output(id, question_text, answer_text)}"
@@ -86,16 +71,13 @@ async def send_successfully_created(
     )
 
 
+@action_wrapper
 async def send_found_similar(
-    message,
-    id,
-    question_text,
-    *,
-    action: SendAction,
+    send: Callable[..., Awaitable[None]],
+    id: int,
+    question_text: str,
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=(
             f"{EmojiStatus.WARNING} A similar question already exists:\n"
             f"{format_question_output(id, question_text)}\n"
@@ -107,31 +89,24 @@ async def send_found_similar(
 
 
 # async def send_failed_creation( # TODO: USAGE
-#     message: Message,
+#     send: Callable[..., Awaitable[None]],
 #     exception="Unexcepted error.",
-#     *,
-#     action: SendAction,
 # ):
-#     await do_action(
-#         message,
-#         action,
+#     await send(
 #         text=format_exception_output(f"Failed to create the question: {exception}"),
 #         reply_markup=mu.back,
 #     )
 
 
 # Finding
+@action_wrapper
 async def send_successfully_found(
-    message: Message,
+    send: Callable[..., Awaitable[None]],
     id: int,
     question_text: str,
     answer_text: str,
-    *,
-    action: SendAction,
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=(
             f"{EmojiStatus.SUCCESSFUL} The question has been successfully found:\n"
             f"{format_question_output(id, question_text, answer_text)}"
@@ -141,10 +116,9 @@ async def send_successfully_found(
     )
 
 
-async def send_not_found(message: Message, id: int, *, action: SendAction):
-    await do_action(
-        message,
-        action,
+@action_wrapper
+async def send_not_found(send: Callable[..., Awaitable[None]], id: int):
+    await send(
         text=f"{EmojiStatus.FAILED} Question {format_id(id)} not found",
         parse_mode="HTML",
         reply_markup=mu.back,
@@ -152,17 +126,11 @@ async def send_not_found(message: Message, id: int, *, action: SendAction):
 
 
 # Delition
+@action_wrapper
 async def send_confirm_deletion(
-    message: Message,
-    id: int,
-    question_text: str,
-    answer_text: str,
-    *,
-    action: SendAction,
+    send: Callable[..., Awaitable[None]], id: int, question_text: str, answer_text: str
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=(
             f"{EmojiAction.SELECT} Confirm deletion?\n"
             f"{format_question_output(id, question_text, answer_text)}"
@@ -172,17 +140,14 @@ async def send_confirm_deletion(
     )
 
 
+@action_wrapper
 async def send_successfully_deleted(
-    message: Message,
+    send: Callable[..., Awaitable[None]],
     id: int,
     question_text: str,
     answer_text: str,
-    *,
-    action: SendAction,
 ):
-    await do_action(
-        message,
-        action,
+    await send(
         text=(
             f"{EmojiStatus.SUCCESSFUL} Next question has been successfully deleted:\n"
             f"{format_question_output(id, question_text, answer_text)}"
