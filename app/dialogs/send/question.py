@@ -149,3 +149,44 @@ async def send_not_found(message: Message, id: int, *, action: SendAction):
         parse_mode="HTML",
         reply_markup=mu.back,
     )
+
+
+# Delition
+async def send_confirm_deletion(
+    message: Message,
+    id: int,
+    question_text: str,
+    answer_text: str,
+    *,
+    action: SendAction,
+):
+    await do_action(
+        message,
+        action,
+        text=(
+            f"{EmojiAction.SELECT} Confirm deletion?\n"
+            f"{format_question_output(id, question_text, answer_text)}"
+        ),
+        parse_mode="HTML",
+        reply_markup=mu.confirm_deletion,
+    )
+
+
+async def send_successfully_deleted(
+    message: Message,
+    id: int,
+    question_text: str,
+    answer_text: str,
+    *,
+    action: SendAction,
+):
+    await do_action(
+        message,
+        action,
+        text=(
+            f"{EmojiStatus.SUCCESSFUL} Next question has been successfully deleted:\n"
+            f"{format_question_output(id, question_text, answer_text)}"
+        ),
+        parse_mode="HTML",
+        reply_markup=mu.back,
+    )
