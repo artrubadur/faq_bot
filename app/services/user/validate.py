@@ -3,12 +3,12 @@ import re
 from app.storage.db.models.user import Role
 
 
-def validate_id(tg_id: str | int) -> int:
-    if isinstance(tg_id, int):
-        return tg_id
+def validate_id(id: str | int) -> int:
+    if isinstance(id, int):
+        return id
 
-    if tg_id.isdigit():
-        return int(tg_id)
+    if id.isdigit():
+        return int(id)
 
     raise ValueError("ID is incorrect")
 

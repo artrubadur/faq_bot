@@ -27,14 +27,14 @@ DIR = "settings.users.delete"
 
 
 class Deletion(StatesGroup):
-    waiting_for_id = State()
+    waiting_for_identity = State()
 
 
-# Entry point
 @router.callback_query(F.data == DIR)
 async def user_delete_cb_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
-
+    await callback.message.edit_reply_markup(reply_markup=None)
+    
     data = await state.get_data()
     found_id: int | None = data.get("found_id", None)
     found_username = data.get("found_username", None)
@@ -46,10 +46,9 @@ async def user_delete_cb_handler(callback: CallbackQuery, state: FSMContext):
         found_username,
         action=SendAction.EDIT,
     )
-    await state.set_state(Deletion.waiting_for_id)
+    await state.set_state(Deletion.waiting_for_identity)
 
 
-# Confirmation
 async def process_identity_handler(
     message: Message,
     state: FSMContext,
@@ -78,7 +77,7 @@ async def process_identity_handler(
     await state.set_state(None)
 
 
-@router.message(Deletion.waiting_for_id)
+@router.message(Deletion.waiting_for_identity)
 async def user_delete_msg_identity_handler(message: Message, state: FSMContext):
     try:
         input_id, input_username = await process_identity_msg(message)
@@ -106,7 +105,6 @@ async def user_delete_cb_identity_handler(
     )
 
 
-# Result
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
 async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()

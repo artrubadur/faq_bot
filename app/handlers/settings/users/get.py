@@ -25,14 +25,14 @@ DIR = "settings.users.get"
 
 
 class Finding(StatesGroup):
-    waiting_for_id = State()
+    waiting_for_identity = State()
 
 
-# Entry point
 @router.callback_query(F.data == DIR)
 async def user_get_cb_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
-
+    await callback.message.edit_reply_markup(reply_markup=None)
+    
     sender_id = callback.from_user.id
     sender_username = callback.from_user.username
     data = await state.get_data()
@@ -48,10 +48,9 @@ async def user_get_cb_handler(callback: CallbackQuery, state: FSMContext):
         sender_username,
         action=SendAction.EDIT,
     )
-    await state.set_state(Finding.waiting_for_id)
+    await state.set_state(Finding.waiting_for_identity)
 
 
-# Identity
 async def process_identity_handler(
     message: Message,
     state: FSMContext,
@@ -84,7 +83,7 @@ async def process_identity_handler(
     await state.set_state(None)
 
 
-@router.message(Finding.waiting_for_id)
+@router.message(Finding.waiting_for_identity)
 async def user_get_msg_identity_handler(message: Message, state: FSMContext):
     try:
         input_id, input_username = await process_identity_msg(message)

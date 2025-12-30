@@ -33,15 +33,15 @@ DIR = "settings.users.create"
 
 
 class Creation(StatesGroup):
-    waiting_for_id = State()
+    waiting_for_identity = State()
     waiting_for_username = State()
     waiting_for_role = State()
 
 
-# Entry Point
 @router.callback_query(F.data == DIR)
 async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
+    await callback.message.edit_reply_markup(reply_markup=None)
 
     data = await state.get_data()
     found_id: int | None = data.get("found_id", None)
@@ -54,10 +54,9 @@ async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
         found_username,
         action=SendAction.EDIT,
     )
-    await state.set_state(Creation.waiting_for_id)
+    await state.set_state(Creation.waiting_for_identity)
 
 
-# Identity
 async def process_identity_handler(
     message: Message,
     state: FSMContext,
@@ -79,7 +78,7 @@ async def process_identity_handler(
         await state.set_state(Creation.waiting_for_role)
 
 
-@router.message(Creation.waiting_for_id)
+@router.message(Creation.waiting_for_identity)
 async def user_create_msg_identity_handler(message: Message, state: FSMContext):
     try:
         input_id, input_username = await process_identity_msg(message)
@@ -107,7 +106,6 @@ async def user_create_cb_identity_handler(
     )
 
 
-# Username
 async def process_username_handler(
     message: Message,
     state: FSMContext,
@@ -148,7 +146,6 @@ async def user_create_cb_username_handler(
     )
 
 
-# Role
 async def process_role_handler(
     message: Message, state: FSMContext, input_role: str, *, send_action: SendAction
 ):
@@ -191,7 +188,6 @@ async def user_create_cb_role_handler(
     )
 
 
-# Confirmation
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
 async def user_create_cb_confirm_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()

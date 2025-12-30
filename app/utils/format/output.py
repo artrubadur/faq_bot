@@ -59,10 +59,11 @@ def format_question_output(
     answer_text: str | None = None,
 ) -> str:
     rows = []
+
+    if id is not None:
+        rows.append(f"{EmojiSymbol.NUMBER}{format_id(id)}")
     if question_text is not None:
-        id_text = f"{EmojiSymbol.NUMBER}{format_id(id)} " if id is not None else ""
-        rows.append(f"{id_text}Question: {question_text}")
-    
+        rows.append(f"Question: {question_text}")
     if answer_text is not None:
         rows.append(f"Answer: {answer_text}")
 

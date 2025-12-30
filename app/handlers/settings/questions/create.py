@@ -34,10 +34,10 @@ class Creation(StatesGroup):
     waiting_for_answer_text = State()
 
 
-# Entry point
 @router.callback_query(F.data == DIR)
 async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
+    await callback.message.edit_reply_markup(reply_markup=None)
 
     await send_enter_question_text(
         callback.message,
@@ -46,7 +46,6 @@ async def user_create_cb_handler(callback: CallbackQuery, state: FSMContext):
     await state.set_state(Creation.waiting_for_question_text)
 
 
-# Question text
 @router.message(Creation.waiting_for_question_text)
 async def user_create_msg_question_text_handler(message: Message, state: FSMContext):
     try:
@@ -61,7 +60,6 @@ async def user_create_msg_question_text_handler(message: Message, state: FSMCont
     await state.set_state(Creation.waiting_for_answer_text)
 
 
-# Answer text
 @router.message(Creation.waiting_for_answer_text)
 async def user_create_msg_answer_text_handler(message: Message, state: FSMContext):
     try:
@@ -81,7 +79,6 @@ async def user_create_msg_answer_text_handler(message: Message, state: FSMContex
     await state.set_state(None)
 
 
-# Confirmation
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR and F.step == "create"))
 async def user_create_cb_create_confirm_handler(
     callback: CallbackQuery, state: FSMContext
@@ -119,7 +116,6 @@ async def user_create_cb_create_confirm_handler(
             )
 
 
-# Found similar
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR and F.step == "similar"))
 async def user_create_cb_similar_confirm_handler(
     callback: CallbackQuery, state: FSMContext
@@ -136,13 +132,13 @@ async def user_create_cb_similar_confirm_handler(
     async with async_session() as session:
         repo = QuestionsRepository(session)
         service = QuestionsService(repo)
-        qustion = await service.create_question(
+        question = await service.create_question(
             input_question_text, input_answer_text, False
         )
         await send_successfully_created(
             callback.message,
-            qustion.id,
-            qustion.question_text,
-            qustion.answer_text,
+            question.id,
+            question.question_text,
+            question.answer_text,
             action=SendAction.EDIT,
         )

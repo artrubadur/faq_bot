@@ -22,27 +22,13 @@ async def process_identity_msg(message: Message):
     return valid_id, input_username
 
 
-async def process_id_msg(message: Message):
-    if message.contact:
-        input_id = message.contact.user_id
-    elif message.forward_from:
-        input_id = message.forward_from.id
-    elif message.text:
-        input_id = format_input(message.text)
-    else:
-        raise ValueError("Invalid message type")
-
-    valid_id = validate_id(input_id)
-    return valid_id
-
-
 async def process_username_msg(message: Message):
     input_username = message.text
     if input_username is None:
         raise ValueError("Invalid message type")
 
-    formated_username = format_input(input_username, True)
-    valid_username = validate_username(formated_username)
+    formatted_username = format_input(input_username, True)
+    valid_username = validate_username(formatted_username)
     return valid_username
 
 

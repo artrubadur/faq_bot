@@ -114,7 +114,7 @@ async def send_failed_creation(
     )
 
 
-# FInding
+# Finding
 async def send_successfully_found(
     message: Message,
     id: int,
