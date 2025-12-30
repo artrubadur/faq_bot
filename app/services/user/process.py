@@ -13,11 +13,13 @@ async def process_identity_msg(message: Message):
             message.forward_from.id,
             message.forward_from.username,
         )
+    elif message.forward_sender_name is not None:
+        raise ValueError("The author's account is hidden")
     elif message.text:
         input_id, input_username = format_input(message.text), None
     else:
         raise ValueError("Invalid message type")
-
+    
     valid_id = validate_id(input_id)
     return valid_id, input_username
 
