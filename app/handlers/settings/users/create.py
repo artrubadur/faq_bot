@@ -26,10 +26,11 @@ from app.services.user.process import (
 )
 from app.storage.db.engine import async_session
 
+from .root import DIR as PARENT_DIR
+
 router = Router()
 
-PARENT_DIR = "settings.users"
-DIR = "settings.users.create"
+DIR = f"{PARENT_DIR}.create"
 
 
 class Creation(StatesGroup):
@@ -63,7 +64,7 @@ async def process_identity_handler(
     input_id: int,
     input_username: str | None,
     *,
-    send_action: SendAction
+    send_action: SendAction,
 ):
     await state.update_data(input_id=input_id, input_username=input_username)
 
@@ -111,7 +112,7 @@ async def process_username_handler(
     state: FSMContext,
     input_username: str | None,
     *,
-    send_action: SendAction
+    send_action: SendAction,
 ):
     await state.update_data(input_username=input_username)
 

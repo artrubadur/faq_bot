@@ -20,10 +20,11 @@ from app.services import UsersService
 from app.services.user.process import process_identity_msg
 from app.storage.db.engine import async_session
 
+from .root import DIR as PARENT_DIR
+
 router = Router()
 
-PARENT_DIR = "settings.users"
-DIR = "settings.users.delete"
+DIR = f"{PARENT_DIR}.delete"
 
 
 class Deletion(StatesGroup):
@@ -55,7 +56,7 @@ async def process_identity_handler(
     input_id: int,
     input_username: str | None,
     *,
-    send_action: SendAction
+    send_action: SendAction,
 ):
     await state.update_data(input_id=input_id)
 

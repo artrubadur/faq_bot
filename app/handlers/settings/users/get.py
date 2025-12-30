@@ -18,10 +18,11 @@ from app.services import UsersService
 from app.services.user.process import process_identity_msg
 from app.storage.db.engine import async_session
 
+from .root import DIR as PARENT_DIR
+
 router = Router()
 
-PARENT_DIR = "settings.users"
-DIR = "settings.users.get"
+DIR = f"{PARENT_DIR}.delete"
 
 
 class Finding(StatesGroup):
@@ -57,7 +58,7 @@ async def process_identity_handler(
     input_id: int,
     input_username: str | None,
     *,
-    send_action: SendAction
+    send_action: SendAction,
 ):
     async with async_session() as session:
         repo = UsersRepository(session)

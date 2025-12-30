@@ -23,10 +23,11 @@ from app.services.question.process import (
 from app.services.question.service import QuestionsService
 from app.storage.db.engine import async_session
 
+from .root import DIR as PARENT_DIR
+
 router = Router()
 
-PARENT_DIR = "settings.questions"
-DIR = "settings.questions.create"
+DIR = f"{PARENT_DIR}.create"
 
 
 class Creation(StatesGroup):

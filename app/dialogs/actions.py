@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import wraps
-from typing import Any, Awaitable, Callable, ParamSpec, Concatenate
+from typing import Any, Awaitable, Callable, Concatenate, ParamSpec
 
 from aiogram.types import Message
 
