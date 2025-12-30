@@ -1,6 +1,10 @@
 from app.core.constants.emoji import EmojiStatus, EmojiSymbol
 
 
+def format_exception(exception: str | None = None):
+    return f"{EmojiStatus.FAILED} {exception or ""}."
+
+
 def format_id(id: int):
     return f"<code>{id}</code>"
 
@@ -17,20 +21,19 @@ def format_user_role(role: str):
     return f"<b>{role.upper()}</b>"
 
 
-def format_user_output(
-    id: int, username: str | None = None, role: str | None = None
-) -> str:
-    rows = [f"Link: {format_user_link(id, username)}", f"ID: {format_id(id)}"]
+def format_user(id: int, username: str | None = None, role: str | None = None) -> str:
+    result = f"Link: {format_user_link(id, username)}\n" f"ID: {format_id(id)}\n"
 
     if username is not None:
-        rows.append(f"Username: {format_username(username)}")
+        result += f"Username: {format_username(username)}\n"
+
     if role is not None:
-        rows.append(f"Role: {format_user_role(role)}")
+        result += f"Role: {format_user_role(role)}\n"
 
-    return "\n".join(rows)
+    return result
 
 
-def format_edited_user_output(
+def format_edited_user(
     id: int,
     edited_id: int,
     username: str | None,
@@ -49,22 +52,43 @@ def format_edited_user_output(
     )
 
 
-def format_exception_output(exception: str | None = None):
-    return f"{EmojiStatus.FAILED} {exception or ""}."
-
-
-def format_question_output(
+def format_question(
     id: int | None = None,
     question_text: str | None = None,
     answer_text: str | None = None,
 ) -> str:
-    rows = []
+    result = ""
 
     if id is not None:
-        rows.append(f"{EmojiSymbol.NUMBER}{format_id(id)} Question:")
-    if question_text is not None:
-        rows.append(f"Text: {question_text}")
-    if answer_text is not None:
-        rows.append(f"Answer: {answer_text}")
+        result += f"{EmojiSymbol.NUMBER}{format_id(id)} Question:\n"
 
-    return "\n".join(rows)
+    if question_text is not None:
+        result += f"{EmojiSymbol.QUESTION} Text:\n" f"{question_text}\n"
+
+    if answer_text is not None:
+        result += f"{EmojiSymbol.ANSWER} Answer:\n" f"{answer_text}\n"
+
+    return result
+
+
+def format_edited_question(
+    id: int,
+    question_text: str,
+    edited_question_text: str,
+    answer_text: str,
+    edited_answer_text: str,
+    recompute_embedding: bool,
+):
+    is_question_text_changed = question_text != edited_question_text
+    is_answer_text_changed = answer_text != edited_answer_text
+
+    result = format_question(
+        id,
+        f"{question_text}{f" {EmojiSymbol.CHANGE}\n{edited_question_text}"if is_question_text_changed else ""}",
+        f"{answer_text}{f" {EmojiSymbol.CHANGE}\n{edited_answer_text}" if is_answer_text_changed else ""}",
+    )
+
+    status = "NOT " if not recompute_embedding else ""
+    result += f"{EmojiSymbol.EMBEDDING} Embedding will {status}be recomputed\n"
+
+    return result

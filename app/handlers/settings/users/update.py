@@ -34,10 +34,11 @@ from app.services.user.process import (
 )
 from app.storage.db.engine import async_session
 
+from .root import DIR as PARENT_DIR
+
 router = Router()
 
-PARENT_DIR = "settings.users"
-DIR = "settings.users.update"
+DIR = f"{PARENT_DIR}.update"
 
 
 class Update(StatesGroup):
@@ -71,7 +72,7 @@ async def process_identity_handler(
     input_id: int,
     input_username: str | None,
     *,
-    send_action: SendAction
+    send_action: SendAction,
 ):
     async with async_session() as session:
         repo = UsersRepository(session)
@@ -244,8 +245,8 @@ async def user_update_cb_edited_role_handler(
     await callback.message.edit_reply_markup(reply_markup=None)
 
     input_role = callback_data.role
-
     await state.update_data(edited_role=input_role)
+
     await process_fields_handler(callback.message, state, send_action=SendAction.EDIT)
 
 
@@ -261,8 +262,6 @@ async def user_update_cb_save_handler(callback: CallbackQuery, state: FSMContext
 
     edited_username: str | None = data.pop("edited_username", username)
     edited_role: str = data.pop("edited_role", role)
-
-    await state.update_data(input_id=None, input_username=None, input_role=None)
 
     async with async_session() as session:
         repo = UsersRepository(session)

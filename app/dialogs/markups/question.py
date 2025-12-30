@@ -29,12 +29,17 @@ confirm_update = InlineKeyboardMarkup(
     inline_keyboard=rows.confirm_row(f"{DIR}.update", DIR, "update")
 )
 
-confirm_recompute_update = InlineKeyboardMarkup(
+confirm_recompute = InlineKeyboardMarkup(
     inline_keyboard=rows.confirm_row(f"{DIR}.update", DIR, "recompute")
 )
 
 field_save_update = InlineKeyboardMarkup(
     inline_keyboard=rows.field_rows(
-        f"{DIR}.update", DIR, ["Question Text", "Answer Text"]
+        f"{DIR}.update",
+        DIR,
+        [
+            rows.FieldButton("Question Text", "question_text"),
+            rows.FieldButton("Answer Text", "answer_text"),
+        ],
     )
 )

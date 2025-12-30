@@ -41,22 +41,16 @@ class QuestionsService:
     async def update_question(
         self,
         id: int,
-        question_text: str | None,
-        question_answer: str | None,
+        question_text: str,
+        answer_text: str,
         recompute_embedding: bool,
     ) -> Question:
-        update_fields = {}
+        update_fields: dict = {
+            "question_text": question_text,
+            "answer_text": answer_text,
+        }
 
-        if question_text is not None:
-            update_fields["question_text"] = question_text
-
-            if recompute_embedding:
-                update_fields["embedding"] = embedding_computer(question_text)
-        else:
-            if recompute_embedding:
-                raise ValueError("Cannot recompute embedding without question_text.")
-
-        if question_answer is not None:
-            update_fields["question_text"] = question_answer
+        if recompute_embedding:
+            update_fields["embedding"] = embedding_computer(question_text)
 
         return await self.repository.update(id, **update_fields)

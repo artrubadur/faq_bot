@@ -61,13 +61,13 @@ async def process_id_handler(
                 question.answer_text,
             )
         except NoResultFound:
-            await send_not_found(message, SendAction.ANSWER, input_id)
+            await send_not_found(message, send_action, input_id)
 
     await state.set_state(None)
 
 
 @router.message(Deletion.waiting_for_id)
-async def user_delete_msg_identity_handler(message: Message, state: FSMContext):
+async def question_delete_msg_id_handler(message: Message, state: FSMContext):
     try:
         input_id = await process_id_msg(message)
     except ValueError as e:
@@ -78,7 +78,7 @@ async def user_delete_msg_identity_handler(message: Message, state: FSMContext):
 
 
 @router.callback_query(IdCallback.filter(F.dir == DIR))
-async def user_delete_cb_identity_handler(
+async def question_delete_cb_identity_handler(
     callback: CallbackQuery, callback_data: IdCallback, state: FSMContext
 ):
     await callback.answer("")

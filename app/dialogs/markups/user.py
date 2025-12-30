@@ -26,5 +26,9 @@ confirm_update = InlineKeyboardMarkup(
 )
 
 field_save_update = InlineKeyboardMarkup(
-    inline_keyboard=rows.field_rows(f"{DIR}.update", DIR, ["username", "role"])
+    inline_keyboard=rows.field_rows(
+        f"{DIR}.update",
+        DIR,
+        [rows.FieldButton("Username", "username"), rows.FieldButton("Role", "role")],
+    )
 )

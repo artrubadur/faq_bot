@@ -64,7 +64,7 @@ async def process_id_handler(
 
 
 @router.message(Finding.waiting_for_id)
-async def question_get_msg_identity_handler(message: Message, state: FSMContext):
+async def question_get_msg_id_handler(message: Message, state: FSMContext):
     try:
         input_id = await process_id_msg(message)
     except ValueError as e:
@@ -75,7 +75,7 @@ async def question_get_msg_identity_handler(message: Message, state: FSMContext)
 
 
 @router.callback_query(IdCallback.filter(F.dir == DIR))
-async def question_get_cb_identity_handler(
+async def question_get_cb_id_handler(
     callback: CallbackQuery, callback_data: IdCallback, state: FSMContext
 ):
     await callback.answer("")

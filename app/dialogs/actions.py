@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import wraps
-from typing import Any, Awaitable, Callable, Concatenate, ParamSpec
+from typing import Awaitable, Callable, Concatenate, ParamSpec
 
 from aiogram.types import Message
 
@@ -15,8 +15,8 @@ class SendAction(str, Enum):
 async def do_action(message: Message, action: SendAction, **kwargs) -> Message:
     match action:
         case SendAction.EDIT:
-            return await message.edit_text(**kwargs) # type: ignore
-            
+            return await message.edit_text(**kwargs)  # type: ignore
+
         case SendAction.REPLY:
             return await message.reply(**kwargs)
 
@@ -31,8 +31,8 @@ P = ParamSpec("P")
 
 
 def action_wrapper(
-    func: Callable[Concatenate[Callable[..., Awaitable[Message]], P], Awaitable[Any]],
-) -> Callable[Concatenate[Message, SendAction, P], Awaitable[Any]]:
+    func: Callable[Concatenate[Callable, P], Awaitable[Message]],
+) -> Callable[Concatenate[Message, SendAction, P], Awaitable[Message]]:
     @wraps(func)
     async def inner(message: Message, action: SendAction, *args, **kwargs):
         async def send(**data):

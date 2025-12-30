@@ -1,6 +1,6 @@
 from typing import Awaitable, Callable
 
-from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardRemove, Message
+from aiogram.types import InlineKeyboardMarkup, Message, ReplyKeyboardRemove
 
 import app.dialogs.rows.root as rows
 from app.core.constants.emoji import EmojiAction
@@ -10,7 +10,9 @@ from app.utils.format.output import format_exception
 
 
 @action_wrapper
-async def send_start(send: Callable[..., Awaitable[Message]], full_name: str) -> Message:
+async def send_start(
+    send: Callable[..., Awaitable[Message]], full_name: str
+) -> Message:
     return await send(
         document=Images.GREETING.value,
         caption=f"You started the bot, {full_name}!",
@@ -19,7 +21,9 @@ async def send_start(send: Callable[..., Awaitable[Message]], full_name: str) ->
 
 
 @action_wrapper
-async def send_confirm_goto(send: Callable[..., Awaitable[Message]], dir: str) -> Message:
+async def send_confirm_goto(
+    send: Callable[..., Awaitable[Message]], dir: str
+) -> Message:
     reply_markup = InlineKeyboardMarkup(inline_keyboard=rows.go_row(dir))
 
     return await send(

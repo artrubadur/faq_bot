@@ -22,7 +22,7 @@ from .root import DIR as PARENT_DIR
 
 router = Router()
 
-DIR = f"{PARENT_DIR}.delete"
+DIR = f"{PARENT_DIR}.get"
 
 
 class Finding(StatesGroup):

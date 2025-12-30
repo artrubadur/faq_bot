@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 
@@ -34,14 +36,15 @@ def back_row(dir: str):
 
 class CancelCallback(CallbackData, prefix="cancel"):
     dir: str
+    step: str
 
 
-def cancel_row(dir: str):
+def cancel_row(dir: str, step: str = ""):
     return [
         [
             InlineKeyboardButton(
                 text=f"{EmojiNav.CANCEL} Cancel",
-                callback_data=CancelCallback(dir=dir).pack(),
+                callback_data=CancelCallback(dir=dir, step=step).pack(),
             ),
         ]
     ]
@@ -61,7 +64,7 @@ def confirm_row(confirm_dir: str, cancel_dir: str, step: str = ""):
             ),
             InlineKeyboardButton(
                 text=EmojiNav.REJECT,
-                callback_data=CancelCallback(dir=cancel_dir).pack(),
+                callback_data=CancelCallback(dir=cancel_dir, step=step).pack(),
             ),
         ]
     ]
@@ -71,7 +74,7 @@ class SaveCallback(CallbackData, prefix="save"):
     dir: str
 
 
-def save_row(save_dir: str, cancel_dir: str):
+def save_row(save_dir: str, cancel_dir: str, step: str = ""):
     return [
         [
             InlineKeyboardButton(
@@ -79,7 +82,7 @@ def save_row(save_dir: str, cancel_dir: str):
             ),
             InlineKeyboardButton(
                 text=EmojiNav.CANCEL_CHANGES,
-                callback_data=CancelCallback(dir=cancel_dir).pack(),
+                callback_data=CancelCallback(dir=cancel_dir, step=step).pack(),
             ),
         ]
     ]
@@ -111,18 +114,20 @@ class EditCallback(CallbackData, prefix="edit"):
     field: str
 
 
-def field_rows(dir, cancel_dir: str, fields: list):
+@dataclass
+class FieldButton:
+    title: str
+    callback: str
+
+
+def field_rows(dir, cancel_dir: str, fields: list[FieldButton]):
     field_rows = [
         [
             InlineKeyboardButton(
-                text=field.capitalize(),
-                callback_data=EditCallback(dir=dir, field=field).pack(),
+                text=field.title,
+                callback_data=EditCallback(dir=dir, field=field.callback).pack(),
             )
         ]
         for field in fields
     ]
     return field_rows + save_row(dir, cancel_dir)
-
-
-# def edit_row(dir, suggestions, nullable):
-#     return cancel_row(dir) +

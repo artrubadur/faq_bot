@@ -7,11 +7,7 @@ import app.dialogs.rows.base as rows
 import app.dialogs.rows.user as urows
 from app.core.constants.emoji import EmojiAction, EmojiStatus
 from app.dialogs.actions import action_wrapper
-from app.utils.format.output import (
-    format_edited_user,
-    format_exception,
-    format_user,
-)
+from app.utils.format.output import format_edited_user, format_exception, format_user
 
 
 # Input
@@ -52,7 +48,9 @@ async def send_enter_username(
 
 
 @action_wrapper
-async def send_select_role(send: Callable[..., Awaitable[Message]], dir: str) -> Message:
+async def send_select_role(
+    send: Callable[..., Awaitable[Message]], dir: str
+) -> Message:
     reply_markup = InlineKeyboardMarkup(inline_keyboard=urows.role_rows(dir))
     return await send(
         text=f"{EmojiAction.SELECT} Select a role:",

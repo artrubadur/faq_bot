@@ -19,7 +19,7 @@ async def process_identity_msg(message: Message):
         input_id, input_username = format_input(message.text), None
     else:
         raise ValueError("Invalid message type")
-    
+
     valid_id = validate_id(input_id)
     return valid_id, input_username
 

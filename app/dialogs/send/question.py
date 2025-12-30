@@ -3,11 +3,11 @@ from typing import Awaitable, Callable
 from aiogram.types import InlineKeyboardMarkup, Message
 
 import app.dialogs.markups.question as mu
-import app.dialogs.rows.question as qrows
 import app.dialogs.rows.base as brows
+import app.dialogs.rows.question as qrows
 from app.core.constants.emoji import EmojiAction, EmojiStatus
 from app.dialogs.actions import action_wrapper
-from app.utils.format.output import format_edited_question, format_exception, format_id, format_question
+from app.utils.format.output import format_edited_question, format_id, format_question
 
 
 # Input
@@ -137,7 +137,10 @@ async def send_not_found(send: Callable[..., Awaitable[Message]], id: int) -> Me
 # Delition
 @action_wrapper
 async def send_confirm_deletion(
-    send: Callable[..., Awaitable[Message]], id: int, question_text: str, answer_text: str
+    send: Callable[..., Awaitable[Message]],
+    id: int,
+    question_text: str,
+    answer_text: str,
 ) -> Message:
     return await send(
         text=(
@@ -177,10 +180,12 @@ async def send_confirm_update(
     return await send(
         text=(
             f"{EmojiAction.SELECT} Update this question?\n"
-            f"{format_question(id, question_text, answer_text)}"),
+            f"{format_question(id, question_text, answer_text)}"
+        ),
         parse_mode="HTML",
         reply_markup=mu.confirm_update,
     )
+
 
 @action_wrapper
 async def send_changes(
@@ -190,21 +195,22 @@ async def send_changes(
     edited_question_text: str,
     answer_text: str,
     edited_answer_text: str,
-    recompute_embedding: bool
+    recompute_embedding: bool,
 ) -> Message:
     changes_text = format_edited_question(
-        id, 
+        id,
         question_text,
         edited_question_text,
         answer_text,
         edited_answer_text,
-        recompute_embedding
+        recompute_embedding,
     )
     return await send(
         text=f"{changes_text}{EmojiAction.SELECT} Select the field to edit:",
         parse_mode="HTML",
         reply_markup=mu.field_save_update,
     )
+
 
 @action_wrapper
 async def send_edit_question_text(
@@ -219,6 +225,7 @@ async def send_edit_question_text(
         reply_markup=reply_markup,
     )
 
+
 @action_wrapper
 async def send_edit_answer_text(
     send: Callable[..., Awaitable[Message]],
@@ -231,7 +238,8 @@ async def send_edit_answer_text(
         text=f"{EmojiAction.ENTER} Enter the answer text",
         reply_markup=reply_markup,
     )
-    
+
+
 @action_wrapper
 async def send_confirm_recompute(
     send: Callable[..., Awaitable[Message]],
@@ -254,7 +262,7 @@ async def send_successfully_updated(
         text=(
             f"{EmojiStatus.SUCCESSFUL} The question has been successfully updated:\n"
             f"{format_question(id, question_text, answer_text)}"
-            ),
+        ),
         parse_mode="HTML",
         reply_markup=mu.back,
     )

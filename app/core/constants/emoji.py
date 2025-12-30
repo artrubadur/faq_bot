@@ -36,3 +36,6 @@ class EmojiStatus(StrEnum):
 class EmojiSymbol(StrEnum):
     CHANGE = "➡️"
     NUMBER = "#️⃣"
+    QUESTION = "🔍"
+    ANSWER = "💡"
+    EMBEDDING = "🧬"
