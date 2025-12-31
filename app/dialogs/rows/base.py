@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 
+from app.core.constants.dirs import CREATE, DELETE, UPDATE, GET
 from app.core.constants.emojis import EmojiAction, EmojiNav, EmojiStatus
 
 
@@ -91,18 +92,18 @@ def crud_rows(dir: str):
     return [
         [
             InlineKeyboardButton(
-                text=f"{EmojiAction.CREATE} Create", callback_data=f"{dir}.create"
+                text=f"{EmojiAction.CREATE} Create", callback_data=f"{dir}.{CREATE}"
             ),
             InlineKeyboardButton(
-                text=f"{EmojiAction.GET} Get", callback_data=f"{dir}.get"
+                text=f"{EmojiAction.GET} Get", callback_data=f"{dir}.{GET}"
             ),
         ],
         [
             InlineKeyboardButton(
-                text=f"{EmojiAction.UPDATE} Update", callback_data=f"{dir}.update"
+                text=f"{EmojiAction.UPDATE} Update", callback_data=f"{dir}.{UPDATE}"
             ),
             InlineKeyboardButton(
-                text=f"{EmojiAction.DELETE} Delete", callback_data=f"{dir}.delete"
+                text=f"{EmojiAction.DELETE} Delete", callback_data=f"{dir}.{DELETE}"
             ),
         ],
     ]
