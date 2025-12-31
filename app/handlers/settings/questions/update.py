@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.exc import NoResultFound
 
+from app.core.constants.dirs import QUESTIONS_UPDATE
 from app.dialogs import SendAction
 from app.dialogs.rows.base import (
     BackCallback,
@@ -35,11 +36,9 @@ from app.services.question.service import QuestionsService
 from app.storage.db.engine import async_session
 from app.utils.history.last_message import LastMessage
 
-from .root import DIR as PARENT_DIR
-
 router = Router()
 
-DIR = f"{PARENT_DIR}.update"
+PARENT_DIR, DIR = QUESTIONS_UPDATE
 
 
 class Update(StatesGroup):
@@ -172,7 +171,9 @@ async def question_update_back_cb_fields_handler(
     await process_fields_handler(callback.message, state, send_action=SendAction.EDIT)
 
 
-@router.callback_query(EditCallback.filter((F.dir == DIR) & (F.field == "question_text")))
+@router.callback_query(
+    EditCallback.filter((F.dir == DIR) & (F.field == "question_text"))
+)
 async def question_update_cb_edit_question_text_handler(
     callback: CallbackQuery, last_message: LastMessage, state: FSMContext
 ):

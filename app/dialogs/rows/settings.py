@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardButton
 
-from app.core.constants.emoji import EmojiMenu
+from app.core.constants.emojis import EmojiMenu
 
 
 def section_rows():

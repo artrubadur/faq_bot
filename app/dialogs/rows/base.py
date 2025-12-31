@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 
-from app.core.constants.emoji import EmojiAction, EmojiNav, EmojiStatus
+from app.core.constants.emojis import EmojiAction, EmojiNav, EmojiStatus
 
 
 class CloseCallback(CallbackData, prefix="close"):
@@ -119,7 +119,7 @@ class FieldButton:
     callback: str
 
 
-def field_rows(dir, cancel_dir: str, fields: list[FieldButton]):
+def field_rows(dir: str, cancel_dir: str, fields: list[FieldButton]):
     field_rows = [
         [
             InlineKeyboardButton(

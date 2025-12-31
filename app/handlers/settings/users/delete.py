@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.exc import NoResultFound
 
+from app.core.constants.dirs import USERS_DELETE
 from app.dialogs import SendAction
 from app.dialogs.rows.base import ConfirmCallback
 from app.dialogs.rows.user import IdentityCallback
@@ -21,11 +22,9 @@ from app.services.user.process import process_identity_msg
 from app.storage.db.engine import async_session
 from app.utils.history.last_message import LastMessage
 
-from .root import DIR as PARENT_DIR
-
 router = Router()
 
-DIR = f"{PARENT_DIR}.delete"
+PARENT_DIR, DIR = USERS_DELETE
 
 
 class Deletion(StatesGroup):
@@ -88,7 +87,7 @@ async def user_delete_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
     await last_message.edit_reply_markup(message, state)
-    
+
     try:
         input_id, input_username = await process_identity_msg(message)
     except ValueError as e:

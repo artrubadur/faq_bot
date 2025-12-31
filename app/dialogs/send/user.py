@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardMarkup, Message
 import app.dialogs.markups.user as mu
 import app.dialogs.rows.base as brows
 import app.dialogs.rows.user as urows
-from app.core.constants.emoji import EmojiAction, EmojiStatus
+from app.core.constants.emojis import EmojiAction, EmojiStatus
 from app.dialogs.actions import action_wrapper
 from app.utils.format.output import format_edited_user, format_exception, format_user
 

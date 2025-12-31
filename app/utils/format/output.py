@@ -1,4 +1,4 @@
-from app.core.constants.emoji import EmojiStatus, EmojiSymbol
+from app.core.constants.emojis import EmojiStatus, EmojiSymbol
 
 
 def format_exception(exception: str | None = None):

@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.exc import NoResultFound
 
+from app.core.constants.dirs import USERS_GET
 from app.dialogs import SendAction
 from app.dialogs.rows.user import IdentityCallback
 from app.dialogs.send.base import send_invalid
@@ -19,11 +20,9 @@ from app.services.user.process import process_identity_msg
 from app.storage.db.engine import async_session
 from app.utils.history.last_message import LastMessage
 
-from .root import DIR as PARENT_DIR
-
 router = Router()
 
-DIR = f"{PARENT_DIR}.get"
+PARENT_DIR, DIR = USERS_GET
 
 
 class Finding(StatesGroup):

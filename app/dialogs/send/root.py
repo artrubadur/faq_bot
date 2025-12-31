@@ -3,7 +3,7 @@ from typing import Awaitable, Callable
 from aiogram.types import InlineKeyboardMarkup, Message, ReplyKeyboardRemove
 
 import app.dialogs.rows.root as rows
-from app.core.constants.emoji import EmojiAction
+from app.core.constants.emojis import EmojiAction
 from app.core.constants.files import Images
 from app.dialogs.actions import action_wrapper
 from app.utils.format.output import format_exception

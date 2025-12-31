@@ -1,42 +1,48 @@
 from aiogram.types import InlineKeyboardMarkup
 
 import app.dialogs.rows.base as rows
-
-DIR = "settings.questions"
-
-
-main = InlineKeyboardMarkup(
-    inline_keyboard=rows.crud_rows(DIR) + rows.back_row("settings"),
+from app.core.constants.dirs import (
+    QUESTIONS,
+    QUESTIONS_CREATE,
+    QUESTIONS_DELETE,
+    QUESTIONS_UPDATE,
+    SETTINGS,
 )
 
-back = InlineKeyboardMarkup(inline_keyboard=rows.back_row(DIR))
+main = InlineKeyboardMarkup(
+    inline_keyboard=rows.crud_rows(QUESTIONS[1]) + rows.back_row(SETTINGS),
+)
 
-cancel = InlineKeyboardMarkup(inline_keyboard=rows.cancel_row(DIR))
+back = InlineKeyboardMarkup(inline_keyboard=rows.back_row(QUESTIONS[1]))
+
+cancel = InlineKeyboardMarkup(inline_keyboard=rows.cancel_row(QUESTIONS[1]))
 
 confirm_creation = InlineKeyboardMarkup(
-    inline_keyboard=rows.confirm_row(f"{DIR}.create", DIR, "create")
+    inline_keyboard=rows.confirm_row(QUESTIONS_CREATE[1], QUESTIONS[1], "create")
 )
 
 confirm_similar = InlineKeyboardMarkup(
-    inline_keyboard=rows.confirm_row(f"{DIR}.create", DIR, "similar")
+    inline_keyboard=rows.confirm_row(QUESTIONS_CREATE[1], QUESTIONS[1], "similar")
 )
 
 confirm_deletion = InlineKeyboardMarkup(
-    inline_keyboard=rows.confirm_row(f"{DIR}.delete", DIR)
+    inline_keyboard=rows.confirm_row(QUESTIONS_DELETE[1], QUESTIONS[1])
 )
 
 confirm_update = InlineKeyboardMarkup(
-    inline_keyboard=rows.confirm_row(f"{DIR}.update", DIR, "update")
+    inline_keyboard=rows.confirm_row(QUESTIONS_UPDATE[1], QUESTIONS[1], "update")
 )
 
 confirm_recompute = InlineKeyboardMarkup(
-    inline_keyboard=rows.confirm_row(f"{DIR}.update", f"{DIR}.update", "recompute")
+    inline_keyboard=rows.confirm_row(
+        QUESTIONS_UPDATE[1], QUESTIONS_UPDATE[1], "recompute"
+    )
 )
 
 field_save_update = InlineKeyboardMarkup(
     inline_keyboard=rows.field_rows(
-        f"{DIR}.update",
-        DIR,
+        QUESTIONS_UPDATE[1],
+        QUESTIONS[1],
         [
             rows.FieldButton("Question Text", "question_text"),
             rows.FieldButton("Answer Text", "answer_text"),

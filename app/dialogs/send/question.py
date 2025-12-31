@@ -5,7 +5,7 @@ from aiogram.types import InlineKeyboardMarkup, Message
 import app.dialogs.markups.question as mu
 import app.dialogs.rows.base as brows
 import app.dialogs.rows.question as qrows
-from app.core.constants.emoji import EmojiAction, EmojiStatus
+from app.core.constants.emojis import EmojiAction, EmojiStatus
 from app.dialogs.actions import action_wrapper
 from app.utils.format.output import format_edited_question, format_id, format_question
 

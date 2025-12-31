@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 
+from app.core.constants.dirs import QUESTIONS_CREATE
 from app.core.exceptions import SimilarityError
 from app.dialogs.actions import SendAction
 from app.dialogs.rows.base import ConfirmCallback
@@ -24,11 +25,9 @@ from app.services.question.service import QuestionsService
 from app.storage.db.engine import async_session
 from app.utils.history.last_message import LastMessage
 
-from .root import DIR as PARENT_DIR
-
 router = Router()
 
-DIR = f"{PARENT_DIR}.create"
+PARENT_DIR, DIR = QUESTIONS_CREATE
 
 
 class Creation(StatesGroup):

@@ -2,13 +2,15 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
-from app.core.constants.emoji import EmojiNav
+from app.core.constants.dirs import QUESTIONS
+from app.core.constants.emojis import EmojiNav
 from app.dialogs import SendAction
 from app.dialogs.rows.base import BackCallback, CancelCallback
 from app.dialogs.send.settings import send_questions_menu
 
 router = Router()
-DIR = "settings.questions"
+
+DIR = QUESTIONS[1]
 
 
 @router.callback_query(F.data == DIR)

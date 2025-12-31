@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.exc import IntegrityError
 
+from app.core.constants.dirs import USERS_CREATE
 from app.dialogs import SendAction
 from app.dialogs.rows.base import ConfirmCallback
 from app.dialogs.rows.user import IdentityCallback, RoleCallback, UsernameCallback
@@ -27,11 +28,9 @@ from app.services.user.process import (
 from app.storage.db.engine import async_session
 from app.utils.history.last_message import LastMessage
 
-from .root import DIR as PARENT_DIR
-
 router = Router()
 
-DIR = f"{PARENT_DIR}.create"
+PARENT_DIR, DIR = USERS_CREATE
 
 
 class Creation(StatesGroup):
@@ -82,7 +81,7 @@ async def process_identity_handler(
             message, send_action, DIR, found_username
         )
         await last_message.set(sent_message, state)
-        
+
         await state.set_state(Creation.waiting_for_username)
     else:
         sent_message = await send_select_role(message, send_action, DIR)

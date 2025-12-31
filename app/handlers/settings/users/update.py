@@ -5,6 +5,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
+from app.core.constants.dirs import USERS_UPDATE
 from app.dialogs import SendAction
 from app.dialogs.rows.base import (
     BackCallback,
@@ -35,11 +36,9 @@ from app.services.user.process import (
 from app.storage.db.engine import async_session
 from app.utils.history.last_message import LastMessage
 
-from .root import DIR as PARENT_DIR
-
 router = Router()
 
-DIR = f"{PARENT_DIR}.update"
+PARENT_DIR, DIR = USERS_UPDATE
 
 
 class Update(StatesGroup):
