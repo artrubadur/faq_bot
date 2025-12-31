@@ -192,14 +192,13 @@ async def send_confirm_update(
 async def send_changes(
     send: Callable[..., Awaitable[Message]],
     id: int,
-    edited_id: int,
     username: str | None,
     edited_username: str | None,
     role: str,
     edited_role: str,
 ) -> Message:
     changes_text = format_edited_user(
-        id, edited_id, username, edited_username, role, edited_role
+        id, username, edited_username, role, edited_role
     )
     return await send(
         text=f"{changes_text}{EmojiAction.SELECT} Select the field to edit:",

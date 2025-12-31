@@ -145,7 +145,6 @@ async def process_fields_handler(
     username: str | None = data["orig_username"]
     role: str = data["orig_role"]
 
-    edited_id: int = data.get("edited_id", id)
     edited_username: str | None = data.get("edited_username", username)
     edited_role: str = data.get("edited_role", role)
 
@@ -153,7 +152,6 @@ async def process_fields_handler(
         message,
         send_action,
         id,
-        edited_id,
         username,
         edited_username,
         role,

@@ -22,7 +22,7 @@ def format_user_role(role: str):
 
 
 def format_user(id: int, username: str | None = None, role: str | None = None) -> str:
-    result = f"Link: {format_user_link(id, username)}\n" f"ID: {format_id(id)}\n"
+    result = f"Link: {format_user_link(id, username)}\nID: {format_id(id)}\n"
 
     if username is not None:
         result += f"Username: {format_username(username)}\n"
@@ -35,20 +35,18 @@ def format_user(id: int, username: str | None = None, role: str | None = None) -
 
 def format_edited_user(
     id: int,
-    edited_id: int,
     username: str | None,
     edited_username: str | None,
     role: str,
     edited_role: str,
 ):
-    is_id_changed = id != edited_id
     is_username_changed = username != edited_username
     is_role_changed = role != edited_role
 
-    return (
-        f"ID: {format_id(id)}{f" {EmojiSymbol.CHANGE} {format_id(edited_id)}" if is_id_changed else ""}\n"
-        f"Username: {format_username(username)}{f" {EmojiSymbol.CHANGE} {format_username(edited_username)}" if is_username_changed else ""}\n"
-        f"Role: {format_user_role(role)}{f" {EmojiSymbol.CHANGE} {format_user_role(edited_role)}" if is_role_changed else ""}"
+    return format_user(
+        id,
+        f"{format_username(username)}{f" {EmojiSymbol.CHANGE} {format_username(edited_username)}"if is_username_changed else ""}",
+        f"{format_user_role(role)}{f" {EmojiSymbol.CHANGE} {format_user_role(edited_role)}"if is_role_changed else ""}",
     )
 
 
