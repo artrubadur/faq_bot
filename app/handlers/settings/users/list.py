@@ -7,7 +7,6 @@ from aiogram.types import CallbackQuery, Message
 from app.core.constants.dirs import USERS_LIST
 from app.dialogs.actions import SendAction
 from app.dialogs.rows.base import (
-    PaginDirectionCallback,
     PaginOrderCallback,
     PaginPageCallback,
     PaginSizeCallback,
@@ -37,28 +36,33 @@ async def process(
     send_action: SendAction
 ):
     data = await state.get_data()
-    order: str = data.get("tmp_order", "id")
-    ascending: bool = data.get("tmp_ascending", True)
-    page: int = data.get("tmp_page", 1)
-    page_size: int = data.get("tmp_page_size", 5)
+    order: str = data["tmp_order"]
+    ascending: bool = data["tmp_ascending"]
+    page: int = data["tmp_page"]
+    page_size: int = data["tmp_page_size"]
 
     async with async_session() as session:
         repo = UsersRepository(session)
         service = UsersService(repo)
 
-        amount = await service.get_user_amount()
-        if page * page_size > amount + page_size:
-            page = amount // page_size + 1
+        if "tmp_amount" not in data:
+            amount = await service.get_user_amount()
+            await state.update_data(tmp_amount=amount)
+        else:
+            amount = data["tmp_amount"]
+
+        max_page = (amount + page_size - 1) // page_size
+        page = min(max_page, page)
 
         users = await service.get_paginated_users(page, page_size, order, ascending)
         sent_message = await send_pagination(
             message,
             send_action,
             users,
-            amount,
             order,
             ascending,
             page,
+            max_page,
             page_size,
         )
         await last_message.set(sent_message, state)
@@ -70,6 +74,10 @@ async def user_list_cb_handler(
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
+
+    await state.update_data(
+        tmp_order="id", tmp_ascending=True, tmp_page=1, tmp_page_size=5
+    )
 
     await process(callback.message, last_message, state, send_action=SendAction.EDIT)
 
@@ -106,7 +114,7 @@ async def user_list_cb_page_handler(
     await callback.answer()
 
     data = await state.get_data()
-    page = data.get("tmp_page", 1) + callback_data.page
+    page = max(1, data.get("tmp_page", 1) + callback_data.page)
     await state.update_data(tmp_page=page)
 
     await process(callback.message, last_message, state, send_action=SendAction.EDIT)
@@ -135,20 +143,11 @@ async def user_list_cb_order_handler(
 ):
     await callback.answer()
 
-    await state.update_data(tmp_order=callback_data.column)
-
-    await process(callback.message, last_message, state, send_action=SendAction.EDIT)
-
-
-@router.callback_query(PaginDirectionCallback.filter(F.dir == DIR))
-async def user_list_cb_direction_handler(
-    callback: CallbackQuery,
-    last_message: LastMessage,
-    callback_data: PaginDirectionCallback,
-    state: FSMContext,
-):
-    await callback.answer()
-
-    await state.update_data(tmp_ascending=callback_data.ascending)
+    new_order = callback_data.column
+    data = await state.get_data()
+    if data["tmp_order"] == new_order:
+        await state.update_data(tmp_ascending=(not data["tmp_ascending"]))
+    else:
+        await state.update_data(tmp_order=new_order)
 
     await process(callback.message, last_message, state, send_action=SendAction.EDIT)

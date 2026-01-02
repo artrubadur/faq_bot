@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-from enum import Enum
 
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton
 
-from app.core.constants.dirs import CREATE, DELETE, GET, UPDATE
+from app.core.constants.dirs import CREATE, DELETE, GET, LIST, UPDATE
 from app.core.constants.emojis import EmojiAction, EmojiNav, EmojiStatus
 
 
@@ -110,6 +109,16 @@ def crud_rows(dir: str):
     ]
 
 
+def list_row(dir: str):
+    return [
+        [
+            InlineKeyboardButton(
+                text=f"{EmojiAction.LIST} List", callback_data=f"{dir}.{LIST}"
+            )
+        ]
+    ]
+
+
 class EditCallback(CallbackData, prefix="edt"):
     dir: str
     field: str
@@ -144,14 +153,14 @@ def pagin_page_row(dir: str, has_prev: bool, has_next: bool):
     if has_prev:
         result.append(
             InlineKeyboardButton(
-                text=EmojiNav.LEFT,
+                text=f"{EmojiNav.LEFT} Previous",
                 callback_data=PaginPageCallback(dir=dir, page=-1).pack(),
             )
         )
     if has_next:
         result.append(
             InlineKeyboardButton(
-                text=EmojiNav.RIGHT,
+                text=f"Next {EmojiNav.RIGHT}",
                 callback_data=PaginPageCallback(dir=dir, page=1).pack(),
             )
         )
@@ -181,34 +190,14 @@ class PaginOrderCallback(CallbackData, prefix="pgo"):
     column: str
 
 
-def pagin_order_row(dir: str, column_enum: type[Enum], current: str):
+def pagin_order_row(dir: str, columns: list[str], current: str, ascending: bool):
+    direction_emoji = EmojiNav.UP if ascending else EmojiNav.DOWN
     return [
         [
             InlineKeyboardButton(
-                text=col.name,
-                callback_data=PaginOrderCallback(dir=dir, column=col.value).pack(),
+                text=f"{direction_emoji} {c.upper()}" if c == current else c,
+                callback_data=PaginOrderCallback(dir=dir, column=c).pack(),
             )
-            for col in column_enum
-            if col.value != current
-        ]
-    ]
-
-
-class PaginDirectionCallback(CallbackData, prefix="pgd"):
-    dir: str
-    ascending: bool
-
-
-def pagin_direction_row(dir: str, current: bool):
-    return [
-        [
-            InlineKeyboardButton(
-                text=(
-                    EmojiNav.DOWN if current else EmojiNav.UP
-                ),  # if current is ascending
-                callback_data=PaginDirectionCallback(
-                    dir=dir, ascending=(not current)
-                ).pack(),
-            )
+            for c in columns
         ]
     ]

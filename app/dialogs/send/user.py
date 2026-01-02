@@ -1,15 +1,20 @@
 from typing import Awaitable, Callable
 
 from aiogram.types import InlineKeyboardMarkup, Message
-from tabulate import tabulate
 
 import app.dialogs.markups.user as mu
 import app.dialogs.rows.base as brows
 import app.dialogs.rows.user as urows
 from app.core.constants.emojis import EmojiAction, EmojiStatus
 from app.dialogs.actions import action_wrapper
+from app.repositories.users import UserColumn
 from app.storage.db.models.user import User
-from app.utils.format.output import format_edited_user, format_exception, format_user
+from app.utils.format.output import (
+    format_edited_user,
+    format_exception,
+    format_table,
+    format_user,
+)
 
 
 # Input
@@ -274,23 +279,22 @@ async def send_failed_update(
 async def send_pagination(
     send: Callable[..., Awaitable[Message]],
     users: list[User],
-    amount: int,
     order: str,
     ascending: bool,
     page: int,
+    max_page: int,
     page_size: int,
 ) -> Message:
+
     has_prev = page > 1
-    has_next = page * page_size < amount
+    has_next = page != max_page
+    columns = [m.value for m in UserColumn]
+
     reply_markup = mu.make_listing_markup(
-        order, ascending, page_size, has_prev, has_next
+        columns, order, ascending, page_size, has_prev, has_next
     )
 
-    text = tabulate(
-        [[u.id, u.telegram_id, u.username, u.role.value] for u in users],
-        ["ID", "Telegram ID", "Username", "Role"],
-        "presto",
-    )
-    text = f"```\n{text}\n```"
+    table = format_table(users, columns)
+    text = f"{EmojiAction.LIST} List of users: {page}/{max_page}\n```\n{table}\n```"
 
     return await send(text=text, reply_markup=reply_markup, parse_mode="Markdown")

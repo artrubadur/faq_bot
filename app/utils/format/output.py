@@ -1,3 +1,5 @@
+from enum import Enum
+
 from app.core.constants.emojis import EmojiStatus, EmojiSymbol
 
 
@@ -90,3 +92,50 @@ def format_edited_question(
     result += f"{EmojiSymbol.EMBEDDING} Embedding will {status}be recomputed\n"
 
     return result
+
+
+def format_table(rows: list, columns: list):
+    full_headers = [""] + columns
+
+    def extract_value(row, field):
+        if hasattr(row, "_mapping"):
+            if field in row._mapping:
+                val = row._mapping[field]
+            else:
+                val = ""
+        else:
+            val = getattr(row, field, "")
+
+        if isinstance(val, Enum):
+            return val.value
+
+        if val is None:
+            return ""
+
+        return str(val)
+
+    table = []
+    for idx, row in enumerate(rows, start=1):
+        row_values = [str(idx)]
+        for col in columns:
+            row_values.append(extract_value(row, col))
+        table.append(row_values)
+
+    col_count = len(full_headers)
+    widths = [0] * col_count
+
+    for i, h in enumerate(full_headers):
+        widths[i] = max(widths[i], len(str(h)))
+
+    for row in table:
+        for i, cell in enumerate(row):
+            widths[i] = max(widths[i], len(cell))
+
+    def fmt_row(row):
+        return " | ".join(row[i].ljust(widths[i]) for i in range(col_count))
+
+    header_line = fmt_row(full_headers)
+    separator = "-+-".join("-" * widths[i] for i in range(col_count))
+    rows_lines = [fmt_row(r) for r in table]
+
+    return "\n".join([header_line, separator] + rows_lines)

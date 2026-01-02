@@ -24,6 +24,7 @@ class EmojiAction(StrEnum):
     GET = "🔍"
     UPDATE = "🔧"
     DELETE = "🗑️"
+    LIST = "🗂"
     SAVE = "💾"
     ENTER = "📝"
     SELECT = "⏩"
