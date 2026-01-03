@@ -8,21 +8,21 @@ from app.core.constants.dirs import QUESTIONS_CREATE
 from app.core.exceptions import SimilarityError
 from app.dialogs.actions import SendAction
 from app.dialogs.rows.common import ConfirmCallback
-from app.dialogs.send.common import send_invalid
-from app.dialogs.send.question import (
+from app.dialogs.send.admin.question import (
     send_confirm_creation,
     send_enter_answer_text,
     send_enter_question_text,
     send_found_similar,
     send_successfully_created,
 )
+from app.dialogs.send.common import send_invalid
 from app.repositories.questions import QuestionsRepository
 from app.services.question.process import (
     process_answer_text_msg,
     process_question_text_msg,
 )
 from app.services.question.service import QuestionsService
-from app.storage.db.engine import async_session
+from app.storage.engine import async_session
 from app.utils.history.last_message import LastMessage
 
 router = Router()

@@ -3,9 +3,9 @@ from aiogram import Router
 from .create import router as create_router
 from .delete import router as delete_router
 from .get import router as get_router
+from .list import router as list_router
 from .root import router as root_router
 from .update import router as update_router
-from .list import router as list_router
 
 router = Router()
 

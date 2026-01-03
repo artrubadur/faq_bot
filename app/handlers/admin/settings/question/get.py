@@ -5,29 +5,27 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.exc import NoResultFound
 
-from app.core.constants.dirs import QUESTIONS_DELETE
+from app.core.constants.dirs import QUESTIONS_GET
 from app.dialogs import SendAction
-from app.dialogs.rows.common import ConfirmCallback
 from app.dialogs.rows.question import IdCallback
-from app.dialogs.send.common import send_invalid
-from app.dialogs.send.question import (
-    send_confirm_deletion,
+from app.dialogs.send.admin.question import (
     send_enter_id,
     send_not_found,
-    send_successfully_deleted,
+    send_successfully_found,
 )
+from app.dialogs.send.common import send_invalid
 from app.repositories.questions import QuestionsRepository
 from app.services.question.process import process_id_msg
 from app.services.question.service import QuestionsService
-from app.storage.db.engine import async_session
+from app.storage.engine import async_session
 from app.utils.history.last_message import LastMessage
 
 router = Router()
 
-PARENT_DIR, DIR = QUESTIONS_DELETE
+PARENT_DIR, DIR = QUESTIONS_GET
 
 
-class Deletion(StatesGroup):
+class Finding(StatesGroup):
     waiting_for_id = State()
 
 
@@ -46,7 +44,7 @@ async def question_get_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Deletion.waiting_for_id)
+    await state.set_state(Finding.waiting_for_id)
 
 
 async def process_id_handler(
@@ -57,10 +55,10 @@ async def process_id_handler(
         service = QuestionsService(repo)
         try:
             question = await service.get_question(input_id)
-            await state.update_data(tmp_input_id=input_id)
-            await send_confirm_deletion(
+            await state.update_data(glb_found_question_id=question.id)
+            await send_successfully_found(
                 message,
-                SendAction.ANSWER,
+                send_action,
                 question.id,
                 question.question_text,
                 question.answer_text,
@@ -71,8 +69,8 @@ async def process_id_handler(
     await state.set_state(None)
 
 
-@router.message(Deletion.waiting_for_id)
-async def question_delete_msg_id_handler(
+@router.message(Finding.waiting_for_id)
+async def question_get_msg_id_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
     await last_message.edit_reply_markup(message, state)
@@ -90,7 +88,7 @@ async def question_delete_msg_id_handler(
 
 
 @router.callback_query(IdCallback.filter(F.dir == DIR))
-async def question_delete_cb_identity_handler(
+async def question_get_cb_id_handler(
     callback: CallbackQuery, callback_data: IdCallback, state: FSMContext
 ):
     await callback.answer("")
@@ -101,32 +99,3 @@ async def question_delete_cb_identity_handler(
     await process_id_handler(
         callback.message, state, input_id, send_action=SendAction.EDIT
     )
-
-
-@router.callback_query(ConfirmCallback.filter(F.dir == DIR))
-async def question_delete_cb_confirm_handler(
-    callback: CallbackQuery, state: FSMContext
-):
-    await callback.answer()
-    await callback.message.edit_reply_markup(reply_markup=None)
-
-    data = await state.get_data()
-    input_id: int = data.pop("tmp_input_id")
-    await state.set_data(data)
-
-    async with async_session() as session:
-        repo = QuestionsRepository(session)
-        service = QuestionsService(repo)
-        try:
-            question = await service.delete_question(input_id)
-            await send_successfully_deleted(
-                callback.message,
-                SendAction.EDIT,
-                question.id,
-                question.question_text,
-                question.answer_text,
-            )
-        except NoResultFound:
-            await send_not_found(callback.message, SendAction.EDIT, input_id)
-
-    await state.set_state(None)

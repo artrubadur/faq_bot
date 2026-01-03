@@ -9,11 +9,11 @@ from .update import router as update_router
 
 router = Router()
 
-router.include_router(create_router)
 router.include_router(root_router)
+router.include_router(create_router)
+router.include_router(get_router)
 router.include_router(delete_router)
 router.include_router(update_router)
-router.include_router(get_router)
 router.include_router(list_router)
 
 __all__ = ["router"]

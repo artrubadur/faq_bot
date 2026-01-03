@@ -1,11 +1,15 @@
 from aiogram import Router
 
-from .root import router as root_router
-from .settings import router as settings_router
+from .admin import router as admin_router
+from .common import router as common_router
+from .public import router as public_router
+from .responder import router as responder_router
 
 router = Router()
 
-router.include_router(root_router)
-router.include_router(settings_router)
+router.include_router(admin_router)
+router.include_router(common_router)
+router.include_router(public_router)
+router.include_router(responder_router)
 
 __all__ = ["router"]

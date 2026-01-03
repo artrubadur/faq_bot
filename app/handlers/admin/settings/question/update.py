@@ -15,8 +15,7 @@ from app.dialogs.rows.common import (
     SaveCallback,
 )
 from app.dialogs.rows.question import IdCallback
-from app.dialogs.send.common import send_invalid
-from app.dialogs.send.question import (
+from app.dialogs.send.admin.question import (
     send_changes,
     send_confirm_recompute,
     send_confirm_update,
@@ -26,6 +25,7 @@ from app.dialogs.send.question import (
     send_not_found,
     send_successfully_updated,
 )
+from app.dialogs.send.common import send_invalid
 from app.repositories.questions import QuestionsRepository
 from app.services.question.process import (
     process_answer_text_msg,
@@ -33,7 +33,7 @@ from app.services.question.process import (
     process_question_text_msg,
 )
 from app.services.question.service import QuestionsService
-from app.storage.db.engine import async_session
+from app.storage.engine import async_session
 from app.utils.history.last_message import LastMessage
 
 router = Router()

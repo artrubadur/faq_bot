@@ -4,7 +4,7 @@ from aiogram.types import InlineKeyboardButton
 import app.dialogs.rows.common as rows
 from app.core.constants.dirs import USERS
 from app.core.constants.emojis import EmojiAction
-from app.storage.db.models.user import Role
+from app.storage.models.user import Role
 
 cancel_row = rows.cancel_row(USERS[1])
 

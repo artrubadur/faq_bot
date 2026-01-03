@@ -15,8 +15,7 @@ from app.dialogs.rows.common import (
     SaveCallback,
 )
 from app.dialogs.rows.user import IdentityCallback, RoleCallback, UsernameCallback
-from app.dialogs.send.common import send_invalid
-from app.dialogs.send.user import (
+from app.dialogs.send.admin.user import (
     send_changes,
     send_confirm_update,
     send_edit_role,
@@ -26,6 +25,7 @@ from app.dialogs.send.user import (
     send_not_found,
     send_successfully_updated,
 )
+from app.dialogs.send.common import send_invalid
 from app.repositories import UsersRepository
 from app.services import UsersService
 from app.services.user.process import (
@@ -33,7 +33,7 @@ from app.services.user.process import (
     process_role_msg,
     process_username_msg,
 )
-from app.storage.db.engine import async_session
+from app.storage.engine import async_session
 from app.utils.history.last_message import LastMessage
 
 router = Router()

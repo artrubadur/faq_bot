@@ -5,12 +5,14 @@ from app.core.constants.dirs import (
     QUESTIONS,
     QUESTIONS_CREATE,
     QUESTIONS_DELETE,
-    QUESTIONS_UPDATE,
     QUESTIONS_LIST,
+    QUESTIONS_UPDATE,
 )
 
 main = InlineKeyboardMarkup(
-    inline_keyboard=rows.crud_rows(QUESTIONS[1]) + rows.list_row(QUESTIONS[1]) + rows.back_row(QUESTIONS[0]),
+    inline_keyboard=rows.crud_rows(QUESTIONS[1])
+    + rows.list_row(QUESTIONS[1])
+    + rows.back_row(QUESTIONS[0]),
 )
 
 back = InlineKeyboardMarkup(inline_keyboard=rows.back_row(QUESTIONS[1]))
@@ -50,6 +52,7 @@ field_save_update = InlineKeyboardMarkup(
     )
 )
 
+
 def make_listing_markup(
     columns: list[str],
     order: str,
@@ -59,7 +62,9 @@ def make_listing_markup(
     has_next: bool,
 ):
     return InlineKeyboardMarkup(
-        inline_keyboard=rows.pagin_order_row(QUESTIONS_LIST[1], columns, order, ascending)
+        inline_keyboard=rows.pagin_order_row(
+            QUESTIONS_LIST[1], columns, order, ascending
+        )
         + rows.pagin_size_row(QUESTIONS_LIST[1], [3, 5, 10, 25], page_size)
         + rows.pagin_page_row(QUESTIONS_LIST[1], has_prev, has_next)
         + rows.back_row(QUESTIONS_LIST[0])

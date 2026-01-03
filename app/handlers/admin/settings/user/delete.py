@@ -5,39 +5,39 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.exc import NoResultFound
 
-from app.core.constants.dirs import USERS_GET
+from app.core.constants.dirs import USERS_DELETE
 from app.dialogs import SendAction
+from app.dialogs.rows.common import ConfirmCallback
 from app.dialogs.rows.user import IdentityCallback
-from app.dialogs.send.common import send_invalid
-from app.dialogs.send.user import (
+from app.dialogs.send.admin.user import (
+    send_confirm_deletion,
     send_enter_identity,
-    send_partially_found,
-    send_successfully_found,
+    send_not_found,
+    send_successfully_deleted,
 )
+from app.dialogs.send.common import send_invalid
 from app.repositories import UsersRepository
 from app.services import UsersService
 from app.services.user.process import process_identity_msg
-from app.storage.db.engine import async_session
+from app.storage.engine import async_session
 from app.utils.history.last_message import LastMessage
 
 router = Router()
 
-PARENT_DIR, DIR = USERS_GET
+PARENT_DIR, DIR = USERS_DELETE
 
 
-class Finding(StatesGroup):
+class Deletion(StatesGroup):
     waiting_for_identity = State()
 
 
 @router.callback_query(F.data == DIR)
-async def user_get_cb_handler(
+async def user_delete_cb_handler(
     callback: CallbackQuery, last_message: LastMessage, state: FSMContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    sender_id = callback.from_user.id
-    sender_username = callback.from_user.username
     data = await state.get_data()
     found_user_id: int | None = data.get("glb_found_user_id", None)
     found_username = data.get("glb_found_username", None)
@@ -48,12 +48,10 @@ async def user_get_cb_handler(
         DIR,
         found_user_id,
         found_username,
-        sender_id,
-        sender_username,
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Finding.waiting_for_identity)
+    await state.set_state(Deletion.waiting_for_identity)
 
 
 async def process_identity_handler(
@@ -69,27 +67,22 @@ async def process_identity_handler(
         service = UsersService(repo)
         try:
             user = await service.get_user(input_id)
-            await state.update_data(
-                glb_found_user_id=user.telegram_id, glb_found_username=user.username
-            )
-            await send_successfully_found(
+            await state.update_data(tmp_input_id=input_id)
+            await send_confirm_deletion(
                 message,
                 send_action,
                 user.telegram_id,
                 user.username,
-                user.role,
+                user.role.value,
             )
         except NoResultFound:
-            await state.update_data(
-                glb_found_user_id=input_id, glb_found_username=input_username
-            )
-            await send_partially_found(message, send_action, input_id, input_username)
+            await send_not_found(message, send_action, input_id, input_username)
 
     await state.set_state(None)
 
 
-@router.message(Finding.waiting_for_identity)
-async def user_get_msg_identity_handler(
+@router.message(Deletion.waiting_for_identity)
+async def user_delete_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
     await last_message.edit_reply_markup(message, state)
@@ -109,7 +102,7 @@ async def user_get_msg_identity_handler(
 
 
 @router.callback_query(IdentityCallback.filter(F.dir == DIR))
-async def user_get_cb_identity_handler(
+async def user_delete_cb_identity_handler(
     callback: CallbackQuery, callback_data: IdentityCallback, state: FSMContext
 ):
     await callback.answer("")
@@ -121,3 +114,30 @@ async def user_get_cb_identity_handler(
     await process_identity_handler(
         callback.message, state, input_id, input_username, send_action=SendAction.EDIT
     )
+
+
+@router.callback_query(ConfirmCallback.filter(F.dir == DIR))
+async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+    data = await state.get_data()
+    input_id: int = data.pop("tmp_input_id")
+    await state.set_data(data)
+
+    async with async_session() as session:
+        repo = UsersRepository(session)
+        service = UsersService(repo)
+        try:
+            user = await service.delete_user(input_id)
+            await send_successfully_deleted(
+                callback.message,
+                SendAction.EDIT,
+                user.telegram_id,
+                user.username,
+                user.role,
+            )
+        except NoResultFound:
+            await send_not_found(callback.message, SendAction.EDIT, input_id)
+
+    await state.set_state(None)

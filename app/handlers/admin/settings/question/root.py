@@ -7,7 +7,7 @@ from app.core.constants.dirs import QUESTIONS
 from app.core.constants.emojis import EmojiNav
 from app.dialogs import SendAction
 from app.dialogs.rows.common import BackCallback, CancelCallback
-from app.dialogs.send.settings import send_questions_menu
+from app.dialogs.send.admin.settings import send_questions_menu
 from app.utils.data.temp import cleanup_temp_data
 
 router = Router()
