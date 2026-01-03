@@ -1,7 +1,7 @@
 from sqlalchemy import text
 
-from app.storage.db.base import Base
-from app.storage.db.engine import engine
+from app.storage.base import Base
+from app.storage.engine import engine
 
 
 async def init_db() -> None:

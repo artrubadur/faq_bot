@@ -3,7 +3,7 @@ import asyncio
 from app.bot.instance import bot, dp
 from app.bot.middleware import LastMessageMiddleware
 from app.handlers import router
-from app.storage.db.init import init_db
+from app.storage.init import init_db
 
 
 async def main():

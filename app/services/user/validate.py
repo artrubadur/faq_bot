@@ -1,6 +1,6 @@
 import re
 
-from app.storage.db.models.user import Role
+from app.storage.models.user import Role
 
 
 def validate_id(id: str | int) -> int:

@@ -1,5 +1,5 @@
 from app.repositories import UsersRepository
-from app.storage.db.models import User
+from app.storage.models import User
 
 
 class UsersService:

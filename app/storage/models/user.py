@@ -4,15 +4,13 @@ from sqlalchemy import BigInteger, String
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.storage.db.base import Base
+from app.storage.base import Base
 
 
 class Role(str, Enum):
     BANNED = "banned"
     USER = "user"
     RESPONDER = "responder"
-    HR = "hr"
-    MODERATOR = "moderator"
     ADMIN = "admin"
 
 

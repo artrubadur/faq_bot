@@ -1,8 +1,8 @@
 from enum import Enum
 
 from app.core.constants.emojis import EmojiStatus, EmojiSymbol
-from app.storage.db.models.question import Question
-from app.storage.db.models.user import User
+from app.storage.models.question import Question
+from app.storage.models.user import User
 
 
 def format_exception(exception: str | None = None):
@@ -96,7 +96,7 @@ def format_edited_question(
     return result
 
 
-def format_user_table(rows: list[User], columns: list, idx_offset = 0):
+def format_user_table(rows: list[User], columns: list, idx_offset=0):
     full_headers = [""] + columns
 
     def extract_value(row, field):
@@ -112,7 +112,7 @@ def format_user_table(rows: list[User], columns: list, idx_offset = 0):
 
     table = []
     for idx, row in enumerate(rows, 1):
-        row_values = [str(idx+idx_offset)]
+        row_values = [str(idx + idx_offset)]
         for col in columns:
             row_values.append(extract_value(row, col))
         table.append(row_values)
@@ -133,7 +133,8 @@ def format_user_table(rows: list[User], columns: list, idx_offset = 0):
 
     return "\n".join([header_line, separator] + rows_lines)
 
-def format_question_table(rows: list[Question], columns: list, idx_offset = 0):
+
+def format_question_table(rows: list[Question], columns: list, idx_offset=0):
     def extract_value(row, field):
         val = getattr(row, field, "")
 
@@ -147,7 +148,7 @@ def format_question_table(rows: list[Question], columns: list, idx_offset = 0):
 
     table = []
     for idx, row in enumerate(rows, 1):
-        row_values = [str(idx+idx_offset)]
+        row_values = [str(idx + idx_offset)]
         for col in columns:
             row_values.append(extract_value(row, col))
         table.append(row_values)
@@ -156,7 +157,7 @@ def format_question_table(rows: list[Question], columns: list, idx_offset = 0):
         delimiter = f"--- Question #{row[0]} ---\n"
         card = "\n".join(f"{col}: {row[i+1]}" for i, col in enumerate(columns))
         return delimiter + card
-    
+
     rows_lines = [fmt_row(r) for r in table]
 
     return "\n\n".join(rows_lines)

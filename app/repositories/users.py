@@ -4,7 +4,7 @@ from typing import cast
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.storage.db.models import User
+from app.storage.models import User
 
 
 class UserColumn(Enum):
@@ -40,10 +40,8 @@ class UsersRepository:
         return result.scalars().all()
 
     async def get_amount(self) -> int:
-        count = cast(
-            int, await self.session.scalar(select(func.count()).select_from(User))
-        )
-        return count
+        result = await self.session.execute(select(func.count()).select_from(User))
+        return cast(int, result.scalar())
 
     async def update(self, id: int, **kwargs) -> User:
         user = await self.get(id)

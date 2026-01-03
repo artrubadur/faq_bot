@@ -1,32 +1,35 @@
-import numpy as np
-
 from app.core.exceptions import SimilarityError
 from app.repositories import QuestionsRepository
-from app.storage.db.models import Question
-
-
-def embedding_computer(question_text: str):  # TODO: API REQUEST
-    return np.random.rand(1024)
-
-
-def find_similar(embedding: np.ndarray) -> int | None:  # TODO: API REQUEST
-    return None
+from app.services.question.embedding import EmbeddingService, embedding_service
+from app.storage.models import Question
 
 
 class QuestionsService:
-    def __init__(self, repository: QuestionsRepository):
+    def __init__(
+        self,
+        repository: QuestionsRepository,
+        new_embedding_service: EmbeddingService | None = None,
+    ):
         self.repository = repository
+        self.embedding_service = new_embedding_service or embedding_service
 
     async def create_question(
         self, question_text: str, question_answer: str, check_similarity: bool
-    ) -> Question:  # TODO: THE CHECK OF THE SIMILARITY WITH EXISTING QUSTIONS
-        embedding = embedding_computer(question_text)
+    ) -> Question:
+        embedding = await self.embedding_service.compute(question_text)
 
-        if check_similarity and (similar_id := find_similar(embedding)) is not None:
-            similar_question = await self.get_question(similar_id)
-            raise SimilarityError("A similar question already exists", similar_question)
+        if check_similarity:
+            row = await self.repository.get_similar(
+                embedding=embedding, limit=1, max_distance=0.2
+            )
+            if len(row) > 0:
+                similar, distance = row[0]
+                similarity = 1 - distance
+                raise SimilarityError(
+                    "A similar question already exists", similar, similarity
+                )
 
-        return await self.repository.create(  # TODO: EXCEPTION HANDLING
+        return await self.repository.create(
             question_text,
             question_answer,
             embedding,
@@ -42,11 +45,24 @@ class QuestionsService:
         self, page: int, page_size: int, order_by: str, ascending: bool
     ) -> list[Question]:
         offset = (page - 1) * page_size
-        questions = await self.repository.get_slice(offset, page_size, order_by, ascending)
+        questions = await self.repository.get_slice(
+            offset, page_size, order_by, ascending
+        )
         return list(questions)
-    
+
     async def delete_question(self, id: int) -> Question:
         return await self.repository.delete(id)
+
+    async def get_similar(
+        self, question_text: str, similarities=False
+    ) -> list[tuple[Question, float]] | list[Question]:
+        embedding = await self.embedding_service.compute(question_text)
+        rows = await self.repository.get_similar(
+            embedding=embedding, limit=3, max_distance=0.2
+        )
+        if similarities:
+            return [(row[0], row[1]) for row in rows]
+        return [row[0] for row in rows]
 
     async def update_question(
         self,
@@ -61,6 +77,8 @@ class QuestionsService:
         }
 
         if recompute_embedding:
-            update_fields["embedding"] = embedding_computer(question_text)
+            update_fields["embedding"] = await self.embedding_service.compute(
+                question_text
+            )
 
         return await self.repository.update(id, **update_fields)

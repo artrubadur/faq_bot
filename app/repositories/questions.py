@@ -1,12 +1,13 @@
 from enum import Enum
-from numpy import ndarray
+from typing import Sequence, Tuple
+from typing import cast as type_cast
+
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Row, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
-from app.storage.db.models import Question
-from typing import cast
+from app.storage.models import Question
 
-from sqlalchemy import func, select
 
 class QuestionColumn(Enum):
     ID = "id"
@@ -14,12 +15,13 @@ class QuestionColumn(Enum):
     ANSWER_TEXT = "answer_text"
     EMBEDDING = "embedding"
 
+
 class QuestionsRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
     async def create(
-        self, question_text: str, answer_text: str, embedding: ndarray
+        self, question_text: str, answer_text: str, embedding: tuple[float, ...]
     ) -> Question:
         new_question = Question(
             question_text=question_text, answer_text=answer_text, embedding=embedding
@@ -33,7 +35,9 @@ class QuestionsRepository:
         question = await self.session.execute(select(Question).where(Question.id == id))
         return question.scalar_one()
 
-    async def get_slice(self, offset: int, limit: int, order_by: str, ascending: bool):
+    async def get_slice(
+        self, offset: int, limit: int, order_by: str, ascending: bool
+    ) -> Sequence[Question]:
         col = getattr(Question, order_by)
 
         order_expr = col.asc() if ascending else col.desc()
@@ -44,10 +48,26 @@ class QuestionsRepository:
         return result.scalars().all()
 
     async def get_amount(self) -> int:
-        count = cast(
-            int, await self.session.scalar(select(func.count()).select_from(Question))
+        result = await self.session.execute(select(func.count()).select_from(Question))
+        return type_cast(int, result.scalar())
+
+    async def get_similar(
+        self,
+        embedding: tuple[float, ...],
+        *,
+        limit: int = 5,
+        max_distance: float = 1,
+    ) -> Sequence[Row[Tuple[Question, float]]]:
+        embedding_vec = cast(embedding, Vector(256))
+        distance = func.cosine_distance(Question.embedding, embedding_vec)
+
+        result = await self.session.execute(
+            select(Question, distance.label("distance"))
+            .order_by(distance)
+            .limit(limit)
+            .where(distance <= max_distance)
         )
-        return count
+        return result.all()
 
     async def update(self, id: int, **kwargs) -> Question:
         question = await self.get(id)
