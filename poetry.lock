@@ -15,15 +15,15 @@ files = [
 
 [[package]]
 name = "aiogram"
-version = "3.23.0"
+version = "3.24.0"
 description = "Modern and fully asynchronous framework for Telegram Bot API"
 optional = false
 python-versions = "<3.15,>=3.10"
 groups = ["main"]
 markers = "python_version < \"3.15\""
 files = [
-    {file = "aiogram-3.23.0-py3-none-any.whl", hash = "sha256:62de64edf7f3e9c8ec86351e0ace6a53a6e073cc81cfd762cb5a0401565d80ad"},
-    {file = "aiogram-3.23.0.tar.gz", hash = "sha256:bb48c0bc1e567b6e9e9d7cfd448f2b3d142d2a405c58ab217596b62f64968f1a"},
+    {file = "aiogram-3.24.0-py3-none-any.whl", hash = "sha256:eb3cc05b0ec53c7e24d7eada5c069aee2f431332e2e7bc2c8adf30d13b02f715"},
+    {file = "aiogram-3.24.0.tar.gz", hash = "sha256:ec547ede5bfa8a7a4f5fb02c75391333fc43b6f3de6a6d3f00a32e27628df5f6"},
 ]
 
 [package.dependencies]
@@ -36,7 +36,6 @@ typing-extensions = ">=4.7.0,<=5.0"
 
 [package.extras]
 cli = ["aiogram-cli (>=1.1.0,<2.0.0)"]
-dev = ["black (>=25.9,<26.0)", "isort (>=7.0,<8.0)", "motor-types (==1.0.0b4)", "mypy (==1.10.1)", "packaging (>=25.0,<26.0)", "pre-commit (>=4.3,<5.0)", "ruff (>=0.14,<1.0)", "toml (>=0.10.2,<0.11.0)"]
 docs = ["furo (>=2024.8.6,<2024.9.0)", "markdown-include (>=0.8.1,<0.9.0)", "pygments (>=2.18.0,<2.19.0)", "pymdown-extensions (>=10.3,<11.0)", "sphinx (>=8.0.2,<8.1.0)", "sphinx-autobuild (>=2024.9.3,<2024.10.0)", "sphinx-copybutton (>=0.5.2,<0.6.0)", "sphinx-intl (>=2.2.0,<2.3.0)", "sphinx-substitution-extensions (>=2024.8.6,<2024.9.0)", "sphinxcontrib-towncrier (>=0.4.0a0,<0.5.0)", "towncrier (>=24.8.0,<24.9.0)"]
 fast = ["aiodns (>=3.0.0)", "uvloop (>=0.17.0) ; (sys_platform == \"darwin\" or sys_platform == \"linux\") and platform_python_implementation != \"PyPy\" and python_version < \"3.13\"", "uvloop (>=0.21.0) ; (sys_platform == \"darwin\" or sys_platform == \"linux\") and platform_python_implementation != \"PyPy\" and python_version >= \"3.13\""]
 i18n = ["babel (>=2.13.0,<3)"]
@@ -44,7 +43,6 @@ mongo = ["motor (>=3.3.2,<3.8)", "pymongo (>4.5,<4.16)"]
 proxy = ["aiohttp-socks (>=0.10.1,<0.11.0)"]
 redis = ["redis[hiredis] (>=6.2.0,<8)"]
 signature = ["cryptography (>=46.0.0)"]
-test = ["aresponses (==3.0.0)", "pycryptodomex (==3.23.0)", "pytest (==9.0.1)", "pytest-aiohttp (==1.1.0)", "pytest-cov (==7.0.0)", "pytest-html (==4.1.1)", "pytest-mock (==3.15.1)", "pytest-mypy (==1.0.1)", "pytz (==2025.2)"]
 
 [[package]]
 name = "aiohappyeyeballs"
@@ -217,7 +215,6 @@ files = [
 
 [package.dependencies]
 frozenlist = ">=1.1.0"
-typing-extensions = {version = ">=4.2", markers = "python_version < \"3.13\""}
 
 [[package]]
 name = "annotated-types"
@@ -226,7 +223,6 @@ description = "Reusable constraint types to use with typing.Annotated"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "python_version < \"3.15\""
 files = [
     {file = "annotated_types-0.7.0-py3-none-any.whl", hash = "sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53"},
     {file = "annotated_types-0.7.0.tar.gz", hash = "sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89"},
@@ -1106,7 +1102,6 @@ description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "python_version < \"3.15\""
 files = [
     {file = "pydantic-2.12.5-py3-none-any.whl", hash = "sha256:e561593fccf61e8a20fc46dfc2dfe075b8be7d0188df33f221ad1f0139180f9d"},
     {file = "pydantic-2.12.5.tar.gz", hash = "sha256:4d351024c75c0f085a9febbb665ce8c0c6ec5d30e903bdb6394b7ede26aebb49"},
@@ -1129,7 +1124,6 @@ description = "Core functionality for Pydantic validation and serialization"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "python_version < \"3.15\""
 files = [
     {file = "pydantic_core-2.41.5-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:77b63866ca88d804225eaa4af3e664c5faf3568cea95360d21f4725ab6e07146"},
     {file = "pydantic_core-2.41.5-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:dfa8a0c812ac681395907e71e1274819dec685fec28273a28905df579ef137e2"},
@@ -1256,6 +1250,30 @@ files = [
 
 [package.dependencies]
 typing-extensions = ">=4.14.1"
+
+[[package]]
+name = "pydantic-settings"
+version = "2.12.0"
+description = "Settings management using Pydantic"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "pydantic_settings-2.12.0-py3-none-any.whl", hash = "sha256:fddb9fd99a5b18da837b29710391e945b1e30c135477f484084ee513adb93809"},
+    {file = "pydantic_settings-2.12.0.tar.gz", hash = "sha256:005538ef951e3c2a68e1c08b292b5f2e71490def8589d4221b95dab00dafcfd0"},
+]
+
+[package.dependencies]
+pydantic = ">=2.7.0"
+python-dotenv = ">=0.21.0"
+typing-inspection = ">=0.4.0"
+
+[package.extras]
+aws-secrets-manager = ["boto3 (>=1.35.0)", "boto3-stubs[secretsmanager]"]
+azure-key-vault = ["azure-identity (>=1.16.0)", "azure-keyvault-secrets (>=4.8.0)"]
+gcp-secret-manager = ["google-cloud-secret-manager (>=2.23.1)"]
+toml = ["tomli (>=2.0.1)"]
+yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
 name = "python-dotenv"
@@ -1426,7 +1444,6 @@ description = "Runtime typing introspection tools"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "python_version < \"3.15\""
 files = [
     {file = "typing_inspection-0.4.2-py3-none-any.whl", hash = "sha256:4ed1cacbdc298c220f1bd249ed5287caa16f34d44ef4e9c3d0cbad5b521545e7"},
     {file = "typing_inspection-0.4.2.tar.gz", hash = "sha256:ba561c48a67c5958007083d386c3295464928b01faa735ab8547c5692e87f464"},
@@ -1583,5 +1600,5 @@ propcache = ">=0.2.1"
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.12"
-content-hash = "2294072b8140cab64006d2f880db18e7a3e9a1d229d67398b1a8ad97e4e54adf"
+python-versions = ">=3.13,<4.0"
+content-hash = "64f2c7f4c6249cf7328654298dae9a2ab0d9f594870e6e2d2db4cc5ad095a6b5"

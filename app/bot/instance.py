@@ -1,7 +1,6 @@
 from aiogram import Bot, Dispatcher
 
-from app.core.config import API_TOKEN
+from app.core.config import config
 
-# session = AiohttpSession(timeout=aiohttp.ClientTimeout(total=60, connect=10))
-bot = Bot(API_TOKEN)  # pyright: ignore[reportArgumentType]
+bot = Bot(config.api_token)
 dp = Dispatcher()

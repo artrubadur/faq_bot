@@ -1,14 +1,11 @@
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from dotenv import load_dotenv
 
-load_dotenv()
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-API_TOKEN = os.getenv("API_TOKEN")
-DATABASE_URL = os.getenv("DATABASE_URL")
+    api_token: str
+    database_url: str
 
-if not API_TOKEN:
-    raise RuntimeError("API_TOKEN is not set")
 
-if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL is not set")
+config = Settings()  # pyright: ignore[reportCallIssue]
