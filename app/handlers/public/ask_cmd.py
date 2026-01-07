@@ -25,15 +25,22 @@ async def process_ask_handler(
     async with async_session() as session:
         repo = QuestionsRepository(session)
         service = QuestionsService(repo)
-        similar_questions = await service.get_similar(question_text, True)
+
+        similar_questions, _ = await service.get_similar_questions(question_text, 8)
+        popular_questions = await service.get_most_popular_questions(
+            8 - len(similar_questions), similar_questions
+        )
+        suggestion = similar_questions + popular_questions
+
         if len(similar_questions) == 0:
             await send_invalid(
                 message,
                 send_action,
                 "It seems that we failed to understand the question",
+                popular_questions,
             )
             return
-        await send_similar(message, send_action, similar_questions)
+        await send_similar(message, send_action, suggestion)
 
 
 @router.message(Command("ask"))

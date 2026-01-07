@@ -36,7 +36,14 @@ class QuestionsService:
         )
 
     async def get_question(self, id: int) -> Question:
-        return await self.repository.get(id)
+        return await self.repository.get_by_id(id)
+
+    async def get_most_popular_questions(
+        self, amount: int, exclude_questions: list[Question] = []
+    ) -> list[Question]:
+        exclude_ids = [q.id for q in exclude_questions]
+        questions = await self.repository.get_most_popular(amount, exclude_ids)
+        return list(questions)
 
     async def get_questions_amount(self) -> int:
         return await self.repository.get_amount()
@@ -53,27 +60,33 @@ class QuestionsService:
     async def delete_question(self, id: int) -> Question:
         return await self.repository.delete(id)
 
-    async def get_similar(
-        self, question_text: str, similarities=False
-    ) -> list[tuple[Question, float]] | list[Question]:
+    async def get_similar_questions(
+        self,
+        question_text: str,
+        amount: int,
+    ) -> tuple[list[Question], list[float]]:
         embedding = await self.embedding_service.compute(question_text)
         rows = await self.repository.get_similar(
-            embedding=embedding, limit=3, max_distance=0.2
+            embedding=embedding, limit=amount, max_distance=0.2
         )
-        if similarities:
-            return [(row[0], row[1]) for row in rows]
-        return [row[0] for row in rows]
+        questions: list[Question] = [row[0] for row in rows]
+        similarities: list[float] = [1 - row[1] for row in rows]
+
+        await self.repository.increment_ratings(questions, similarities)
+        return questions, similarities
 
     async def update_question(
         self,
         id: int,
         question_text: str,
         answer_text: str,
+        rating: float,
         recompute_embedding: bool,
     ) -> Question:
         update_fields: dict = {
             "question_text": question_text,
             "answer_text": answer_text,
+            "rating": rating,
         }
 
         if recompute_embedding:

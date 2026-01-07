@@ -2,7 +2,11 @@
 from aiogram.filters import CommandObject
 from aiogram.types import Message
 
-from app.services.question.validate import validate_id, validate_question_text
+from app.services.question.validate import (
+    validate_id,
+    validate_question_text,
+    validate_rating,
+)
 from app.utils.format.input import format_input
 
 
@@ -46,3 +50,13 @@ async def process_answer_text_msg(message: Message):
     formatted_answer_text = format_input(input_answer_text)
     valid_answer_text = validate_question_text(formatted_answer_text)
     return valid_answer_text
+
+
+async def process_rating_msg(message: Message):
+    input_rating = message.text
+    if input_rating is None:
+        raise ValueError("Please send a simple text message with the rating")
+
+    formatted_rating = format_input(input_rating)
+    valid_rating = validate_rating(formatted_rating)
+    return valid_rating

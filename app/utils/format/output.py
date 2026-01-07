@@ -60,17 +60,21 @@ def format_question(
     id: int | None = None,
     question_text: str | None = None,
     answer_text: str | None = None,
+    rating: str | None = None,
 ) -> str:
     result = ""
 
     if id is not None:
-        result += f"{EmojiSymbol.NUMBER}{format_id(id)} Question:\n"
+        result += f"{EmojiSymbol.INDEX}{format_id(id)} Question:\n"
 
     if question_text is not None:
-        result += f"{EmojiSymbol.QUESTION} Text:\n" f"{question_text}\n"
+        result += f"{EmojiSymbol.QUESTION} Text:\n {question_text}\n"
 
     if answer_text is not None:
-        result += f"{EmojiSymbol.ANSWER} Answer:\n" f"{answer_text}\n"
+        result += f"{EmojiSymbol.ANSWER} Answer:\n {answer_text}\n"
+
+    if rating is not None:
+        result += f"{EmojiSymbol.RATING} Rating: {rating}\n"
 
     return result
 
@@ -81,15 +85,19 @@ def format_edited_question(
     edited_question_text: str,
     answer_text: str,
     edited_answer_text: str,
+    rating: float,
+    edited_rating: float,
     recompute_embedding: bool,
 ):
     is_question_text_changed = question_text != edited_question_text
     is_answer_text_changed = answer_text != edited_answer_text
+    is_rating_changed = rating != edited_rating
 
     result = format_question(
         id,
         f"{question_text}{f" {EmojiSymbol.CHANGE}\n{edited_question_text}"if is_question_text_changed else ""}",
         f"{answer_text}{f" {EmojiSymbol.CHANGE}\n{edited_answer_text}" if is_answer_text_changed else ""}",
+        f"{rating}{f" {EmojiSymbol.CHANGE} {edited_rating}" if is_rating_changed else ""}",
     )
 
     status = "<b>NOT</b> " if not recompute_embedding else ""

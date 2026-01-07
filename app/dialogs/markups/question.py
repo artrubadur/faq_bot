@@ -48,6 +48,7 @@ field_save_update = InlineKeyboardMarkup(
         [
             rows.FieldButton("Question Text", "question_text"),
             rows.FieldButton("Answer Text", "answer_text"),
+            rows.FieldButton("Rating", "rating"),
         ],
     )
 )

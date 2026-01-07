@@ -20,3 +20,10 @@ def validate_answer_text(question_text: str) -> str:
     if lenght > 384:
         raise ValueError("The answer text is too long")
     return question_text
+
+
+def validate_rating(rating: str) -> float:
+    try:
+        return float(rating)
+    except ValueError:
+        raise ValueError("Rating is incorrect")

@@ -11,6 +11,7 @@ from app.storage.models import Question
 
 class QuestionColumn(Enum):
     ID = "id"
+    RATING = "rating"
     QUESTION_TEXT = "question_text"
     ANSWER_TEXT = "answer_text"
     EMBEDDING = "embedding"
@@ -31,9 +32,20 @@ class QuestionsRepository:
         await self.session.refresh(new_question)
         return new_question
 
-    async def get(self, id: int) -> Question:
+    async def get_by_id(self, id: int) -> Question:
         question = await self.session.execute(select(Question).where(Question.id == id))
         return question.scalar_one()
+
+    async def get_most_popular(
+        self, limit: int, exclude_ids: list[int]
+    ) -> Sequence[Question]:
+        questions = await self.session.execute(
+            select(Question)
+            .where(Question.id.notin_(exclude_ids))
+            .order_by(Question.rating.desc())
+            .limit(limit)
+        )
+        return questions.scalars().all()
 
     async def get_slice(
         self, offset: int, limit: int, order_by: str, ascending: bool
@@ -42,20 +54,20 @@ class QuestionsRepository:
 
         order_expr = col.asc() if ascending else col.desc()
 
-        result = await self.session.execute(
+        questions = await self.session.execute(
             select(Question).order_by(order_expr).offset(offset).limit(limit)
         )
-        return result.scalars().all()
+        return questions.scalars().all()
 
     async def get_amount(self) -> int:
-        result = await self.session.execute(select(func.count()).select_from(Question))
-        return type_cast(int, result.scalar())
+        amount = await self.session.execute(select(func.count()).select_from(Question))
+        return type_cast(int, amount.scalar())
 
     async def get_similar(
         self,
         embedding: tuple[float, ...],
         *,
-        limit: int = 5,
+        limit: int,
         max_distance: float = 1,
     ) -> Sequence[Row[Tuple[Question, float]]]:
         embedding_vec = cast(embedding, Vector(256))
@@ -70,14 +82,21 @@ class QuestionsRepository:
         return result.all()
 
     async def update(self, id: int, **kwargs) -> Question:
-        question = await self.get(id)
+        question = await self.get_by_id(id)
         for key, value in kwargs.items():
             setattr(question, key, value)
         await self.session.commit()
         return question
 
+    async def increment_ratings(
+        self, questions: list[Question], similarities: list[float]
+    ):
+        for question, similarity in zip(questions, similarities):
+            question.rating += similarity
+        await self.session.commit()
+
     async def delete(self, id: int):
-        question = await self.get(id)
+        question = await self.get_by_id(id)
         await self.session.delete(question)
         await self.session.commit()
         return question

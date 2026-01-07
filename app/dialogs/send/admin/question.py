@@ -204,6 +204,8 @@ async def send_changes(
     edited_question_text: str,
     answer_text: str,
     edited_answer_text: str,
+    rating: float,
+    edited_rating: float,
     recompute_embedding: bool,
 ) -> Message:
     changes_text = format_edited_question(
@@ -212,6 +214,8 @@ async def send_changes(
         edited_question_text,
         answer_text,
         edited_answer_text,
+        rating,
+        edited_rating,
         recompute_embedding,
     )
     return await send(
@@ -245,6 +249,20 @@ async def send_edit_answer_text(
 
     return await send(
         text=f"{EmojiAction.ENTER} Enter the answer text",
+        reply_markup=reply_markup,
+    )
+
+
+@with_message_action
+async def send_edit_rating(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    reply_markup = InlineKeyboardMarkup(
+        inline_keyboard=brows.cancel_row("settings.questions.update")
+    )
+
+    return await send(
+        text=f"{EmojiAction.ENTER} Enter the rating",
         reply_markup=reply_markup,
     )
 
