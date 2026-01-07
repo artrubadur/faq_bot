@@ -4,11 +4,11 @@ from aiogram.types import InlineKeyboardMarkup, Message
 
 import app.dialogs.rows.root as rows
 from app.core.constants.emojis import EmojiAction
-from app.dialogs.actions import action_wrapper
+from app.dialogs.actions import with_message_action
 from app.utils.format.output import format_exception
 
 
-@action_wrapper
+@with_message_action
 async def send_confirm_goto(
     send: Callable[..., Awaitable[Message]], dir: str
 ) -> Message:
@@ -21,7 +21,7 @@ async def send_confirm_goto(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_invalid_path(
     send: Callable[..., Awaitable[Message]], exception: str | None = None
 ) -> Message:

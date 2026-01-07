@@ -6,7 +6,7 @@ import app.dialogs.markups.question as mu
 import app.dialogs.rows.common as brows
 import app.dialogs.rows.question as qrows
 from app.core.constants.emojis import EmojiAction, EmojiStatus
-from app.dialogs.actions import action_wrapper
+from app.dialogs.actions import with_message_action
 from app.repositories.questions import QuestionColumn
 from app.storage.models.question import Question
 from app.utils.format.output import (
@@ -18,7 +18,7 @@ from app.utils.format.output import (
 
 
 # Input
-@action_wrapper
+@with_message_action
 async def send_enter_id(
     send: Callable[..., Awaitable[Message]],
     dir: str,
@@ -32,7 +32,7 @@ async def send_enter_id(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_enter_question_text(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
@@ -42,7 +42,7 @@ async def send_enter_question_text(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_enter_answer_text(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
@@ -53,7 +53,7 @@ async def send_enter_answer_text(
 
 
 # Creation
-@action_wrapper
+@with_message_action
 async def send_confirm_creation(
     send: Callable[..., Awaitable[Message]],
     question_text: str,
@@ -72,7 +72,7 @@ async def send_confirm_creation(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_successfully_created(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -89,7 +89,7 @@ async def send_successfully_created(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_found_similar(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -117,7 +117,7 @@ async def send_found_similar(
 
 
 # Finding
-@action_wrapper
+@with_message_action
 async def send_successfully_found(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -134,7 +134,7 @@ async def send_successfully_found(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_not_found(send: Callable[..., Awaitable[Message]], id: int) -> Message:
     return await send(
         text=f"{EmojiStatus.FAILED} Question {format_id(id)} not found",
@@ -144,7 +144,7 @@ async def send_not_found(send: Callable[..., Awaitable[Message]], id: int) -> Me
 
 
 # Delition
-@action_wrapper
+@with_message_action
 async def send_confirm_deletion(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -161,7 +161,7 @@ async def send_confirm_deletion(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_successfully_deleted(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -179,7 +179,7 @@ async def send_successfully_deleted(
 
 
 # Update
-@action_wrapper
+@with_message_action
 async def send_confirm_update(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -196,7 +196,7 @@ async def send_confirm_update(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_changes(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -221,7 +221,7 @@ async def send_changes(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_edit_question_text(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
@@ -235,7 +235,7 @@ async def send_edit_question_text(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_edit_answer_text(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
@@ -249,7 +249,7 @@ async def send_edit_answer_text(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_confirm_recompute(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
@@ -260,7 +260,7 @@ async def send_confirm_recompute(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_successfully_updated(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -288,7 +288,7 @@ async def send_successfully_updated(
 #     )
 
 
-@action_wrapper
+@with_message_action
 async def send_pagination(
     send: Callable[..., Awaitable[Message]],
     questions: list[Question],

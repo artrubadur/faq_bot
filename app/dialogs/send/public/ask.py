@@ -2,11 +2,11 @@ from typing import Awaitable, Callable
 
 from aiogram.types import Message
 
-from app.dialogs.actions import action_wrapper
+from app.dialogs.actions import with_message_action
 from app.storage.models.question import Question
 
 
-@action_wrapper
+@with_message_action
 async def send_similar(
     send: Callable[..., Awaitable[Message]], questions: list[tuple[Question, float]]
 ) -> Message:
@@ -14,7 +14,7 @@ async def send_similar(
     return await send(text=most_similar.answer_text)
 
 
-@action_wrapper
+@with_message_action
 async def send_invalid(
     send: Callable[..., Awaitable[Message]], exception: str
 ) -> Message:

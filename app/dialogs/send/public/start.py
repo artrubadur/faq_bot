@@ -3,10 +3,10 @@ from typing import Awaitable, Callable
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from app.core.constants.files import Image
-from app.dialogs.actions import action_wrapper
+from app.dialogs.actions import with_message_action
 
 
-@action_wrapper
+@with_message_action
 async def send_start(
     send: Callable[..., Awaitable[Message]], full_name: str
 ) -> Message:

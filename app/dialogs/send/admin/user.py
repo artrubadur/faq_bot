@@ -6,7 +6,7 @@ import app.dialogs.markups.user as mu
 import app.dialogs.rows.common as brows
 import app.dialogs.rows.user as urows
 from app.core.constants.emojis import EmojiAction, EmojiStatus
-from app.dialogs.actions import action_wrapper
+from app.dialogs.actions import with_message_action
 from app.repositories.users import UserColumn
 from app.storage.models.user import User
 from app.utils.format.output import (
@@ -18,7 +18,7 @@ from app.utils.format.output import (
 
 
 # Input
-@action_wrapper
+@with_message_action
 async def send_enter_identity(
     send: Callable[..., Awaitable[Message]],
     dir: str,
@@ -39,7 +39,7 @@ async def send_enter_identity(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_enter_username(
     send: Callable[..., Awaitable[Message]],
     dir: str,
@@ -58,7 +58,7 @@ async def send_enter_username(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_select_role(
     send: Callable[..., Awaitable[Message]], dir: str
 ) -> Message:
@@ -72,7 +72,7 @@ async def send_select_role(
 
 
 # Creation
-@action_wrapper
+@with_message_action
 async def send_confirm_creation(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -86,7 +86,7 @@ async def send_confirm_creation(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_successfully_created(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -100,7 +100,7 @@ async def send_successfully_created(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_failed_creation(
     send: Callable[..., Awaitable[Message]],
     exception="Unexcepted error.",
@@ -112,7 +112,7 @@ async def send_failed_creation(
 
 
 # Finding
-@action_wrapper
+@with_message_action
 async def send_successfully_found(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -129,7 +129,7 @@ async def send_successfully_found(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_partially_found(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -146,7 +146,7 @@ async def send_partially_found(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_not_found(
     send: Callable[..., Awaitable[Message]], id: int, username: str | None = None
 ) -> Message:
@@ -158,7 +158,7 @@ async def send_not_found(
 
 
 # Deletion
-@action_wrapper
+@with_message_action
 async def send_confirm_deletion(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -172,7 +172,7 @@ async def send_confirm_deletion(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_successfully_deleted(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -187,7 +187,7 @@ async def send_successfully_deleted(
 
 
 # Update
-@action_wrapper
+@with_message_action
 async def send_confirm_update(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -201,7 +201,7 @@ async def send_confirm_update(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_changes(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -218,7 +218,7 @@ async def send_changes(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_edit_username(
     send: Callable[..., Awaitable[Message]],
     dir: str,
@@ -235,7 +235,7 @@ async def send_edit_username(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_edit_role(
     send: Callable[..., Awaitable[Message]],
     dir: str,
@@ -250,7 +250,7 @@ async def send_edit_role(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_successfully_updated(
     send: Callable[..., Awaitable[Message]],
     id: int,
@@ -264,7 +264,7 @@ async def send_successfully_updated(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_failed_update(
     send: Callable[..., Awaitable[Message]],
     exception="Unexcepted error.",
@@ -275,7 +275,7 @@ async def send_failed_update(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_pagination(
     send: Callable[..., Awaitable[Message]],
     users: list[User],

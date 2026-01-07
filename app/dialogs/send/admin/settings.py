@@ -7,10 +7,10 @@ import app.dialogs.markups.user as umu
 import app.dialogs.rows.common as brows
 import app.dialogs.rows.settings as srows
 from app.core.constants.emojis import EmojiMenu
-from app.dialogs.actions import action_wrapper
+from app.dialogs.actions import with_message_action
 
 
-@action_wrapper
+@with_message_action
 async def send_settings_menu(send: Callable[..., Awaitable[Message]]) -> Message:
     reply_markup = InlineKeyboardMarkup(
         inline_keyboard=srows.section_rows() + brows.close_row()
@@ -22,7 +22,7 @@ async def send_settings_menu(send: Callable[..., Awaitable[Message]]) -> Message
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_users_menu(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
@@ -32,7 +32,7 @@ async def send_users_menu(
     )
 
 
-@action_wrapper
+@with_message_action
 async def send_questions_menu(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
