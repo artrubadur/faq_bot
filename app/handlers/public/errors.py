@@ -1,14 +1,11 @@
 import traceback
 
 from aiogram import Router
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import ErrorEvent
 
 from app.dialogs.actions import SendAction
 from app.dialogs.send.common import send_unexcepted_error, send_unhandled_exception
-from app.repositories.users import UsersRepository
-from app.services.user.service import UsersService
-from app.storage.engine import async_session
+from app.services.notification import notify
 from app.storage.models.user import Role
 from app.utils.format.output import format_message
 
@@ -31,21 +28,6 @@ async def errors_handler(event: ErrorEvent):
         f"Unhandled error: {exception}\nMessage:\n{message_str}\nTraceback:\n{tb_string}"
     )
 
-    try:
-        async with async_session() as session:
-            repo = UsersRepository(session)
-            service = UsersService(repo)
-            try:
-                users = await service.get_users_by_role(Role.ADMIN)
-                for user in users:
-                    await send_unhandled_exception(
-                        user.telegram_id,  # pyright: ignore[reportArgumentType]
-                        exception,
-                    )
-            except Exception as notification_exception:
-                print(f"Failed to notify admins: {notification_exception}")
-
-    except TelegramBadRequest:
-        pass
+    await notify(Role.ADMIN, send_unhandled_exception, exception)
 
     return True

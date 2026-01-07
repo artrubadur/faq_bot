@@ -86,14 +86,14 @@ async def process_identity_handler(
             await state.update_data(
                 tmp_orig_id=user.telegram_id,
                 tmp_orig_username=user.username,
-                tmp_orig_role=user.role.value,
+                tmp_orig_role=user.role,
             )
             await send_confirm_update(
                 message,
                 send_action,
                 user.telegram_id,
                 user.username,
-                user.role.value,
+                user.role,
             )
         except NoResultFound:
             await send_not_found(message, send_action, input_id, input_username)
