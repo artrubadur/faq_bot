@@ -12,6 +12,6 @@ class Question(Base):
     question_text: Mapped[str] = mapped_column(String(384))
     answer_text: Mapped[str] = mapped_column(String(384))
     rating: Mapped[float] = mapped_column(
-        Float, default=0.0, server_default=text("0.0")
+        Float, server_default=text("0.0")
     )
     embedding: Mapped[list[float]] = mapped_column(Vector(256))
