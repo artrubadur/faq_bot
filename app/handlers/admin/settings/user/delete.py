@@ -73,7 +73,7 @@ async def process_identity_handler(
                 send_action,
                 user.telegram_id,
                 user.username,
-                user.role.value,
+                user.role,
             )
         except NoResultFound:
             await send_not_found(message, send_action, input_id, input_username)
