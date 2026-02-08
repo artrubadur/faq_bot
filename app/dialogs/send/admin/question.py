@@ -337,4 +337,4 @@ async def send_pagination(
 async def send_empty_pagination(
     send: Callable[..., Awaitable[Message]],
 ) -> Message:
-    return await send(text="No questions found in the system", reply_markup=mu.back)
+    return await send(text=f"{EmojiAction.LIST} No questions found in the system", reply_markup=mu.back)

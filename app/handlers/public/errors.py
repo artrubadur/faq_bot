@@ -4,9 +4,8 @@ from loguru import logger
 
 from app.core.exceptions import AppError
 from app.dialogs.actions import SendAction
-from app.dialogs.send.common import send_unexcepted_error, send_unhandled_exception
-from app.services.notification import notify
-from app.storage.models.user import Role
+from app.dialogs.send.common import send_unexcepted_error
+
 
 router = Router()
 
@@ -32,7 +31,5 @@ async def errors_handler(event: ErrorEvent):
 
     if message is not None and should_notify:
         await send_unexcepted_error(message, SendAction.ANSWER)
-
-    await notify(Role.ADMIN, send_unhandled_exception, exception)
 
     return True

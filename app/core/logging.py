@@ -5,7 +5,30 @@ import traceback
 from pathlib import Path
 
 import yaml
-from loguru import logger
+from loguru import logger, Message
+
+from app.dialogs.send.common import send_log
+from app.services.notification import notify
+from app.storage.models.user import Role
+import asyncio
+from contextvars import ContextVar
+
+is_notifying = ContextVar("is_notifying", default=False)
+
+def telegram_sink(message: Message):
+    if is_notifying.get():
+        return
+    
+    record = message.record
+
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        token = is_notifying.set(True)
+        try:
+            loop = asyncio.get_event_loop()
+            loop.create_task(notify(Role.ADMIN, send_log, record['name'], record['message'], record['level'], record['exception']))
+        finally:
+            is_notifying.reset(token)
 
 
 def serialize_json(record):
@@ -40,10 +63,13 @@ def setup_logging(config_path: Path):
             sink = sys.stdout
         elif raw_sink == "ext://sys.stderr":
             sink = sys.stderr
+        elif raw_sink == "telegram":
+            sink = telegram_sink
         else:
             sink = str(raw_sink)
 
         is_json = h.pop("json", False)
+
         if is_json:
             h["format"] = serialize_json
 

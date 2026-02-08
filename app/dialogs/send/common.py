@@ -1,9 +1,9 @@
 from typing import Awaitable, Callable
-
+from loguru import Level
 from aiogram.types import InlineKeyboardMarkup, Message
 
 import app.dialogs.rows.common as rows
-from app.core.constants.emojis import EmojiStatus
+from app.core.constants.emojis import EmojiStatus, EmojiAction
 from app.dialogs.actions import with_chat_message, with_message_action
 
 
@@ -27,10 +27,16 @@ async def send_unexcepted_error(send: Callable[..., Awaitable[Message]]) -> Mess
 
 
 @with_chat_message
-async def send_unhandled_exception(
-    send: Callable[..., Awaitable[Message]], exception: Exception
+async def send_log(
+    send: Callable[..., Awaitable[Message]], name: str, message: str, level: Level, exception: Exception | None
 ) -> Message:
+    error_str = f"Error: `{exception.type} {exception.value}`\n" if exception is not None else ""
     return await send(
-        text=f"{EmojiStatus.FAILED} Unhandled error: `{exception}`\nCheck the logs",
+        text=(
+            f"{level.icon} [{level.name}] from `{name}`\n"
+            f"Log: `{message}`\n"
+            f"{error_str}"
+            f"{EmojiAction.GET} Check the logs for more"
+            ),
         parse_mode="Markdown",
     )
