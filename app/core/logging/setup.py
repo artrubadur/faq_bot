@@ -1,55 +1,29 @@
-import json
 import logging
 import sys
-import traceback
 from pathlib import Path
 
 import yaml
-from loguru import logger, Message
+from loguru import logger
 
-from app.dialogs.send.common import send_log
-from app.services.notification import notify
-from app.storage.models.user import Role
-import asyncio
-from contextvars import ContextVar
-
-is_notifying = ContextVar("is_notifying", default=False)
-
-def telegram_sink(message: Message):
-    if is_notifying.get():
-        return
-    
-    record = message.record
-
-    loop = asyncio.get_event_loop()
-    if loop.is_running():
-        token = is_notifying.set(True)
-        try:
-            loop = asyncio.get_event_loop()
-            loop.create_task(notify(Role.ADMIN, send_log, record['name'], record['message'], record['level'], record['exception']))
-        finally:
-            is_notifying.reset(token)
+from app.core.logging.throttler import TelegramThrottler
+from app.utils.format.log import serialize_json
 
 
-def serialize_json(record):
-    payload = {
-        "time": record["time"].isoformat(),
-        "level": record["level"].name,
-        "message": record["message"],
-        "name": record["name"],
-    }
-    exception = record["exception"]
-    if exception:
-        payload["error"] = "".join(
-            traceback.format_exception(
-                exception.type, exception.value, exception.traceback
-            )
+def make_telegram_sink(log_manager: TelegramThrottler):
+    def telegram_sink(message):
+        record = message.record
+
+        log_manager.add_log(
+            record["name"] or "unknown",
+            record["message"],
+            record["level"],
+            record["exception"],
         )
 
-    return f"{{{json.dumps(payload, ensure_ascii=False)}}}\n"
+    return telegram_sink
 
 
-def setup_logging(config_path: Path):
+def setup_logging(config_path: Path, cooldown: int):
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
@@ -64,7 +38,8 @@ def setup_logging(config_path: Path):
         elif raw_sink == "ext://sys.stderr":
             sink = sys.stderr
         elif raw_sink == "telegram":
-            sink = telegram_sink
+            log_manager = TelegramThrottler(cooldown)
+            sink = make_telegram_sink(log_manager)
         else:
             sink = str(raw_sink)
 

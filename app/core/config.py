@@ -5,6 +5,7 @@ class Config(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     env: str
+    tg_log_cooldown: int
     tg_bot_token: str
     db_name: str
     db_user: str

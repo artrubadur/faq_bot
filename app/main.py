@@ -6,7 +6,7 @@ from loguru import logger
 from app.bot.instance import bot, dp
 from app.bot.middlewares import LastMessageMiddleware, LogHandlerMiddleware
 from app.core.config import config
-from app.core.logging import setup_logging
+from app.core.logging.setup import setup_logging
 from app.handlers import router
 from app.storage.init import init_db
 
@@ -14,7 +14,7 @@ CONFIG_DIR = Path.cwd() / "config"
 
 
 async def main():
-    setup_logging(CONFIG_DIR / f"logging.{config.env}.yml")
+    setup_logging(CONFIG_DIR / f"logging.{config.env}.yml", config.tg_log_cooldown)
     await init_db()
 
     last_message_mw = LastMessageMiddleware(bot)

@@ -6,7 +6,6 @@ from app.core.exceptions import AppError
 from app.dialogs.actions import SendAction
 from app.dialogs.send.common import send_unexcepted_error
 
-
 router = Router()
 
 
