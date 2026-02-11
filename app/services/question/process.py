@@ -2,8 +2,8 @@
 from aiogram.filters import CommandObject
 from aiogram.types import Message
 
+from app.services.common.validate import validate_id
 from app.services.question.validate import (
-    validate_id,
     validate_question_text,
     validate_rating,
 )

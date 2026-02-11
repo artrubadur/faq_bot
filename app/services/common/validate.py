@@ -7,3 +7,13 @@ def validate_page(page: str):
         raise ValueError("Page cannot be less than one")
 
     return int_page
+
+
+def validate_id(id: str | int) -> int:
+    if isinstance(id, int):
+        return id
+
+    if id.isdigit():
+        return int(id)
+
+    raise ValueError("ID is incorrect")

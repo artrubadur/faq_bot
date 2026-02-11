@@ -1,7 +1,8 @@
 # pyright: reportArgumentType=false
 from aiogram.types import Message
 
-from app.services.user.validate import validate_id, validate_role, validate_username
+from app.services.common.validate import validate_id
+from app.services.user.validate import validate_role, validate_username
 from app.utils.format.input import format_input
 
 
