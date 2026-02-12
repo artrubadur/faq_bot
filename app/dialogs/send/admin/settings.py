@@ -4,6 +4,7 @@ from aiogram.types import InlineKeyboardMarkup, Message
 
 import app.dialogs.markups.question as qmu
 import app.dialogs.markups.user as umu
+import app.dialogs.markups.ticket as tmu
 import app.dialogs.rows.common as brows
 import app.dialogs.rows.settings as srows
 from app.core.constants.emojis import EmojiMenu
@@ -39,4 +40,14 @@ async def send_questions_menu(
     return await send(
         text=f"{EmojiMenu.QUESTIONS} Question Management",
         reply_markup=qmu.main,
+    )
+
+
+@with_message_action
+async def send_tickets_menu(
+    send: Callable[..., Awaitable[Message]],
+) -> Message:
+    return await send(
+        text=f"{EmojiMenu.TICKETS} Ticket Management",
+        reply_markup=tmu.main,
     )

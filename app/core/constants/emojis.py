@@ -5,6 +5,7 @@ class EmojiMenu(StrEnum):
     SETTINGS = "⚙"
     USERS = "👤"
     QUESTIONS = "📚"
+    TICKETS = "🎟️"
 
 
 class EmojiNav(StrEnum):

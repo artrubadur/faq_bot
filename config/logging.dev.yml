@@ -1,6 +1,6 @@
 handlers:
   - sink: "ext://sys.stdout"
-    level: "INFO"
+    level: "WARNING"
     colorize: true
     format: "<green>{time:YYYY-MM-DD HH:mm:ss}</green> [<level>{level}</level>] <cyan>{name}</cyan>: {message} | Extra: {extra}"
 
@@ -14,5 +14,5 @@ handlers:
     level: "WARNING"
 
 activation:
-  - ["aiogram.event", "INFO"]
-  - ["aiogram.dispatcher", "INFO"]
+  - ["aiogram.event", "WARNING"]
+  - ["aiogram.dispatcher", "WARNING"]

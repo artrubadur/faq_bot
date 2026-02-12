@@ -16,4 +16,10 @@ def section_rows():
                 callback_data="settings.questions",
             ),
         ],
+        [
+            InlineKeyboardButton(
+                text=f"{EmojiMenu.TICKETS} Tickets",
+                callback_data="settings.tickets",
+            ),
+        ],
     ]
