@@ -25,7 +25,7 @@ router = Router()
 PARENT_DIR, DIR = USERS_LIST
 
 
-class Listing(StatesGroup):
+class UserListing(StatesGroup):
     waiting_for_page = State()
 
 
@@ -87,10 +87,10 @@ async def user_list_cb_handler(
 
     await process(callback.message, last_message, state, send_action=SendAction.EDIT)
 
-    await state.set_state(Listing.waiting_for_page)
+    await state.set_state(UserListing.waiting_for_page)
 
 
-@router.message(Listing.waiting_for_page)
+@router.message(UserListing.waiting_for_page)
 async def user_list_msg_page_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

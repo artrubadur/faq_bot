@@ -26,7 +26,7 @@ router = Router()
 PARENT_DIR, DIR = QUESTIONS_GET
 
 
-class Finding(StatesGroup):
+class QuestionFinding(StatesGroup):
     waiting_for_id = State()
 
 
@@ -45,7 +45,7 @@ async def question_get_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Finding.waiting_for_id)
+    await state.set_state(QuestionFinding.waiting_for_id)
 
 
 async def process_id_handler(
@@ -58,6 +58,7 @@ async def process_id_handler(
             question = await service.get_question(input_id)
         except NoResultFound:
             await send_not_found(message, send_action, input_id)
+            return
 
     await state.update_data(glb_found_question_id=question.id)
 
@@ -73,7 +74,7 @@ async def process_id_handler(
     await state.set_state(None)
 
 
-@router.message(Finding.waiting_for_id)
+@router.message(QuestionFinding.waiting_for_id)
 async def question_get_msg_id_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

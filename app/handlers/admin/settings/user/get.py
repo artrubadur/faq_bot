@@ -26,7 +26,7 @@ router = Router()
 PARENT_DIR, DIR = USERS_GET
 
 
-class Finding(StatesGroup):
+class UserFinding(StatesGroup):
     waiting_for_identity = State()
 
 
@@ -54,7 +54,7 @@ async def user_get_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Finding.waiting_for_identity)
+    await state.set_state(UserFinding.waiting_for_identity)
 
 
 async def process_identity_handler(
@@ -90,7 +90,7 @@ async def process_identity_handler(
     await state.set_state(None)
 
 
-@router.message(Finding.waiting_for_identity)
+@router.message(UserFinding.waiting_for_identity)
 async def user_get_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

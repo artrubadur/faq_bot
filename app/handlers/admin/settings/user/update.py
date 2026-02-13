@@ -42,7 +42,7 @@ router = Router()
 PARENT_DIR, DIR = USERS_UPDATE
 
 
-class Update(StatesGroup):
+class UserUpdate(StatesGroup):
     waiting_for_identity = State()
     waiting_for_username = State()
     waiting_for_role = State()
@@ -68,7 +68,7 @@ async def user_update_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Update.waiting_for_identity)
+    await state.set_state(UserUpdate.waiting_for_identity)
 
 
 async def process_identity_handler(
@@ -102,7 +102,7 @@ async def process_identity_handler(
     await state.set_state(None)
 
 
-@router.message(Update.waiting_for_identity)
+@router.message(UserUpdate.waiting_for_identity)
 async def user_update_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -200,10 +200,10 @@ async def user_update_cb_edit_username_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Update.waiting_for_username)
+    await state.set_state(UserUpdate.waiting_for_username)
 
 
-@router.message(Update.waiting_for_username)
+@router.message(UserUpdate.waiting_for_username)
 async def user_update_msg_edited_username_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -244,10 +244,10 @@ async def user_update_msg_edit_role_handler(
     sent_message = await send_edit_role(callback.message, SendAction.EDIT, DIR)
     await last_message.set(sent_message, state)
 
-    await state.set_state(Update.waiting_for_role)
+    await state.set_state(UserUpdate.waiting_for_role)
 
 
-@router.message(Update.waiting_for_role)
+@router.message(UserUpdate.waiting_for_role)
 async def user_update_msg_edited_role_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

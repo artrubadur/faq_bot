@@ -31,7 +31,7 @@ router = Router()
 PARENT_DIR, DIR = QUESTIONS_CREATE
 
 
-class Creation(StatesGroup):
+class QuestionCreation(StatesGroup):
     waiting_for_question_text = State()
     waiting_for_answer_text = State()
 
@@ -46,10 +46,10 @@ async def question_create_cb_handler(callback: CallbackQuery, state: FSMContext)
         SendAction.EDIT,
     )
 
-    await state.set_state(Creation.waiting_for_question_text)
+    await state.set_state(QuestionCreation.waiting_for_question_text)
 
 
-@router.message(Creation.waiting_for_question_text)
+@router.message(QuestionCreation.waiting_for_question_text)
 async def question_create_msg_question_text_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -68,10 +68,10 @@ async def question_create_msg_question_text_handler(
 
     await send_enter_answer_text(message, SendAction.ANSWER)
 
-    await state.set_state(Creation.waiting_for_answer_text)
+    await state.set_state(QuestionCreation.waiting_for_answer_text)
 
 
-@router.message(Creation.waiting_for_answer_text)
+@router.message(QuestionCreation.waiting_for_answer_text)
 async def question_create_msg_answer_text_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

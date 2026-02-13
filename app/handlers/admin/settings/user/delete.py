@@ -28,7 +28,7 @@ router = Router()
 PARENT_DIR, DIR = USERS_DELETE
 
 
-class Deletion(StatesGroup):
+class UserDeletion(StatesGroup):
     waiting_for_identity = State()
 
 
@@ -52,7 +52,7 @@ async def user_delete_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Deletion.waiting_for_identity)
+    await state.set_state(UserDeletion.waiting_for_identity)
 
 
 async def process_identity_handler(
@@ -82,7 +82,7 @@ async def process_identity_handler(
     await state.set_state(None)
 
 
-@router.message(Deletion.waiting_for_identity)
+@router.message(UserDeletion.waiting_for_identity)
 async def user_delete_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

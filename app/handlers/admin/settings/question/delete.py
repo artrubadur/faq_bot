@@ -28,7 +28,7 @@ router = Router()
 PARENT_DIR, DIR = QUESTIONS_DELETE
 
 
-class Deletion(StatesGroup):
+class QuestionDeletion(StatesGroup):
     waiting_for_id = State()
 
 
@@ -47,7 +47,7 @@ async def question_get_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Deletion.waiting_for_id)
+    await state.set_state(QuestionDeletion.waiting_for_id)
 
 
 async def process_id_handler(
@@ -72,7 +72,7 @@ async def process_id_handler(
     await state.set_state(None)
 
 
-@router.message(Deletion.waiting_for_id)
+@router.message(QuestionDeletion.waiting_for_id)
 async def question_delete_msg_id_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

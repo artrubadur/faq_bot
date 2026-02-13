@@ -34,7 +34,7 @@ router = Router()
 PARENT_DIR, DIR = USERS_CREATE
 
 
-class Creation(StatesGroup):
+class UserCreation(StatesGroup):
     waiting_for_identity = State()
     waiting_for_username = State()
     waiting_for_role = State()
@@ -60,7 +60,7 @@ async def user_create_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Creation.waiting_for_identity)
+    await state.set_state(UserCreation.waiting_for_identity)
 
 
 async def process_identity_handler(
@@ -83,15 +83,15 @@ async def process_identity_handler(
         )
         await last_message.set(sent_message, state)
 
-        await state.set_state(Creation.waiting_for_username)
+        await state.set_state(UserCreation.waiting_for_username)
     else:
         sent_message = await send_select_role(message, send_action, DIR)
         await last_message.set(sent_message, state)
 
-        await state.set_state(Creation.waiting_for_role)
+        await state.set_state(UserCreation.waiting_for_role)
 
 
-@router.message(Creation.waiting_for_identity)
+@router.message(UserCreation.waiting_for_identity)
 async def user_create_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -152,10 +152,10 @@ async def process_username_handler(
     sent_message = await send_select_role(message, send_action, DIR)
     await last_message.set(sent_message, state)
 
-    await state.set_state(Creation.waiting_for_role)
+    await state.set_state(UserCreation.waiting_for_role)
 
 
-@router.message(Creation.waiting_for_username)
+@router.message(UserCreation.waiting_for_username)
 async def user_create_msg_username_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -218,7 +218,7 @@ async def process_role_handler(
     await state.set_state(None)
 
 
-@router.message(Creation.waiting_for_role)
+@router.message(UserCreation.waiting_for_role)
 async def user_create_msg_role_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):

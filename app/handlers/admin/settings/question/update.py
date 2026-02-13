@@ -44,7 +44,7 @@ router = Router()
 PARENT_DIR, DIR = QUESTIONS_UPDATE
 
 
-class Update(StatesGroup):
+class QuestionUpdate(StatesGroup):
     waiting_for_id = State()
     waiting_for_question_text = State()
     waiting_for_answer_text = State()
@@ -66,7 +66,7 @@ async def question_update_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Update.waiting_for_id)
+    await state.set_state(QuestionUpdate.waiting_for_id)
 
 
 async def process_id_handler(
@@ -96,7 +96,7 @@ async def process_id_handler(
     await state.set_state(None)
 
 
-@router.message(Update.waiting_for_id)
+@router.message(QuestionUpdate.waiting_for_id)
 async def question_update_msg_id_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -193,10 +193,10 @@ async def question_update_cb_edit_question_text_handler(
     sent_message = await send_edit_question_text(callback.message, SendAction.EDIT)
     await last_message.set(sent_message, state)
 
-    await state.set_state(Update.waiting_for_question_text)
+    await state.set_state(QuestionUpdate.waiting_for_question_text)
 
 
-@router.message(Update.waiting_for_question_text)
+@router.message(QuestionUpdate.waiting_for_question_text)
 async def question_update_msg_edited_question_text_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -250,10 +250,10 @@ async def question_update_cb_edit_answer_text_handler(
     sent_message = await send_edit_answer_text(callback.message, SendAction.EDIT)
     await last_message.set(sent_message, state)
 
-    await state.set_state(Update.waiting_for_answer_text)
+    await state.set_state(QuestionUpdate.waiting_for_answer_text)
 
 
-@router.message(Update.waiting_for_answer_text)
+@router.message(QuestionUpdate.waiting_for_answer_text)
 async def question_update_msg_edited_answer_text_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -283,10 +283,10 @@ async def question_update_cb_edit_rating_handler(
     sent_message = await send_edit_rating(callback.message, SendAction.EDIT)
     await last_message.set(sent_message, state)
 
-    await state.set_state(Update.waiting_for_rating)
+    await state.set_state(QuestionUpdate.waiting_for_rating)
 
 
-@router.message(Update.waiting_for_rating)
+@router.message(QuestionUpdate.waiting_for_rating)
 async def question_update_msg_edited_rating_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
