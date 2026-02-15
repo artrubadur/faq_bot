@@ -21,4 +21,4 @@ async def notify(role: Role, send: Callable, *args, **kwargs):
                 except TelegramForbiddenError:
                     pass
     except Exception:
-        logger.exception("Failed to notify", tg_id=user.id, role=role.name)
+        logger.warning("Failed to notify", tg_id=user.id, role=role.name)

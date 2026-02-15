@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from app.core.constants.emojis import EmojiStatus, EmojiSymbol
@@ -23,6 +24,10 @@ def format_username(username: str | None):
 
 def format_user_role(role: str):
     return f"<b>{role.upper()}</b>"
+
+
+def format_date(date: datetime):
+    return date.strftime("%d.%m.%Y %H:%M")
 
 
 def format_user(id: int, username: str | None = None, role: str | None = None) -> str:
@@ -52,6 +57,44 @@ def format_edited_user(
         f"{format_username(username)}{f" {EmojiSymbol.CHANGE} {format_username(edited_username)}"if is_username_changed else ""}",
         f"{format_user_role(role)}{f" {EmojiSymbol.CHANGE} {format_user_role(edited_role)}"if is_role_changed else ""}",
     )
+
+
+def format_user_table(rows: list[User], columns: list, idx_offset=0):
+    full_headers = [""] + columns
+
+    def extract_value(row, field):
+        val = getattr(row, field, "")
+
+        if isinstance(val, Enum):
+            return val.value
+
+        if val is None:
+            return ""
+
+        return str(val)
+
+    table = []
+    for idx, row in enumerate(rows, 1):
+        row_values = [str(idx + idx_offset)]
+        for col in columns:
+            row_values.append(extract_value(row, col))
+        table.append(row_values)
+
+    col_count = len(full_headers)
+    widths = [len(str(h)) for h in full_headers]
+
+    for row in table:
+        for i, cell in enumerate(row):
+            widths[i] = max(widths[i], len(cell))
+
+    def fmt_row(row):
+        return " | ".join(row[i].ljust(widths[i]) for i in range(col_count))
+
+    header_line = fmt_row(full_headers)
+    separator = "-+-".join("-" * widths[i] for i in range(col_count))
+    rows_lines = [fmt_row(r) for r in table]
+
+    return "\n".join([header_line, separator] + rows_lines)
 
 
 def format_question(
@@ -104,44 +147,6 @@ def format_edited_question(
     return result
 
 
-def format_user_table(rows: list[User], columns: list, idx_offset=0):
-    full_headers = [""] + columns
-
-    def extract_value(row, field):
-        val = getattr(row, field, "")
-
-        if isinstance(val, Enum):
-            return val.value
-
-        if val is None:
-            return ""
-
-        return str(val)
-
-    table = []
-    for idx, row in enumerate(rows, 1):
-        row_values = [str(idx + idx_offset)]
-        for col in columns:
-            row_values.append(extract_value(row, col))
-        table.append(row_values)
-
-    col_count = len(full_headers)
-    widths = [len(str(h)) for h in full_headers]
-
-    for row in table:
-        for i, cell in enumerate(row):
-            widths[i] = max(widths[i], len(cell))
-
-    def fmt_row(row):
-        return " | ".join(row[i].ljust(widths[i]) for i in range(col_count))
-
-    header_line = fmt_row(full_headers)
-    separator = "-+-".join("-" * widths[i] for i in range(col_count))
-    rows_lines = [fmt_row(r) for r in table]
-
-    return "\n".join([header_line, separator] + rows_lines)
-
-
 def format_question_table(rows: list[Question], columns: list, idx_offset=0):
     def extract_value(row, field):
         val = getattr(row, field, "")
@@ -169,3 +174,38 @@ def format_question_table(rows: list[Question], columns: list, idx_offset=0):
     rows_lines = [fmt_row(r) for r in table]
 
     return "\n\n".join(rows_lines)
+
+
+def format_ticket(
+    id: int | None = None,
+    author_id: int | None = None,
+    responder_id: int | None = None,
+    question_text: str | None = None,
+    answer_text: str | None = None,
+    created_at: datetime | None = None,
+    answered_at: datetime | None = None,
+) -> str:
+    result = ""
+
+    if id is not None:
+        result += f"{EmojiSymbol.INDEX}{format_id(id)} Question:\n"
+
+    if author_id is not None:
+        result += f"{EmojiSymbol.ID} Author ID: {format_id(author_id)}\n"
+
+    if responder_id is not None:
+        result += f"{EmojiSymbol.ID} Reponder ID: {format_id(responder_id)}\n"
+
+    if question_text is not None:
+        result += f"{EmojiSymbol.QUESTION} Text:\n {question_text}\n"
+
+    if answer_text is not None:
+        result += f"{EmojiSymbol.ANSWER} Answer:\n {answer_text}\n"
+
+    if created_at is not None:
+        result += f"{EmojiSymbol.DATE} Created at: {format_date(created_at)}\n"
+
+    if answered_at is not None:
+        result += f"{EmojiSymbol.DATE} Answered at: {format_date(answered_at)}\n"
+
+    return result

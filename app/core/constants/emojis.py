@@ -42,6 +42,8 @@ class EmojiStatus(StrEnum):
 class EmojiSymbol(StrEnum):
     CHANGE = "➡️"
     INDEX = "#️⃣"
+    ID = "🆔️"
+    DATE = "📅"
     RATING = "🚀"
     QUESTION = "🔍"
     ANSWER = "💡"
