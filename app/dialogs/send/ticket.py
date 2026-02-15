@@ -8,7 +8,7 @@ import app.dialogs.rows.common as brows
 import app.dialogs.rows.question as qrows
 from app.core.constants.emojis import EmojiAction, EmojiStatus
 from app.dialogs.actions import with_message_action
-from app.utils.format.output import format_exception, format_id, format_ticket
+from app.utils.format.output import format_id, format_ticket
 
 
 # Input
@@ -70,16 +70,6 @@ async def send_successfully_created(
         reply_markup=mu.back,
     )
 
-
-@with_message_action
-async def send_failed_creation(
-    send: Callable[..., Awaitable[Message]],
-    exception="Unexcepted error.",
-) -> Message:
-    return await send(
-        text=format_exception(f"Failed to create the ticket: {exception}"),
-        reply_markup=mu.back,
-    )
 
 # Finding
 @with_message_action
