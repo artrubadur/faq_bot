@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -31,25 +30,27 @@ router = Router()
 PARENT_DIR, DIR = QUESTIONS_CREATE
 
 
-class Creation(StatesGroup):
+class QuestionCreation(StatesGroup):
     waiting_for_question_text = State()
     waiting_for_answer_text = State()
 
 
 @router.callback_query(F.data == DIR)
-async def question_create_cb_handler(callback: CallbackQuery, state: FSMContext):
+async def question_create_cb_handler(callback: CallbackQuery, last_message: LastMessage, state: FSMContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    await send_enter_question_text(
-        callback.message,
+    sent_message = await send_enter_question_text(
+        callback.message, # pyright: ignore[reportArgumentType]
         SendAction.EDIT,
+        PARENT_DIR
     )
+    await last_message.set(sent_message, state)
 
-    await state.set_state(Creation.waiting_for_question_text)
+    await state.set_state(QuestionCreation.waiting_for_question_text)
 
 
-@router.message(Creation.waiting_for_question_text)
+@router.message(QuestionCreation.waiting_for_question_text)
 async def question_create_msg_question_text_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -66,12 +67,13 @@ async def question_create_msg_question_text_handler(
 
     await state.update_data(tmp_input_question_text=input_question_text)
 
-    await send_enter_answer_text(message, SendAction.ANSWER)
+    sent_message = await send_enter_answer_text(message, SendAction.ANSWER, PARENT_DIR)
+    await last_message.set(sent_message, state)
 
-    await state.set_state(Creation.waiting_for_answer_text)
+    await state.set_state(QuestionCreation.waiting_for_answer_text)
 
 
-@router.message(Creation.waiting_for_answer_text)
+@router.message(QuestionCreation.waiting_for_answer_text)
 async def question_create_msg_answer_text_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -118,7 +120,7 @@ async def question_create_cb_create_confirm_handler(
             )
             await state.set_data(data)
             await send_successfully_created(
-                callback.message,
+                callback.message, # pyright: ignore[reportArgumentType]
                 SendAction.EDIT,
                 qustion.id,
                 qustion.question_text,
@@ -126,7 +128,7 @@ async def question_create_cb_create_confirm_handler(
             )
         except SimilarityError as e:
             await send_found_similar(
-                callback.message,
+                callback.message, # pyright: ignore[reportArgumentType]
                 SendAction.EDIT,
                 e.question.id,
                 e.question.question_text,
@@ -154,7 +156,7 @@ async def question_create_cb_similar_confirm_handler(
 
     logger.debug("Question created", id=question.id)
     await send_successfully_created(
-        callback.message,
+        callback.message, # pyright: ignore[reportArgumentType]
         SendAction.EDIT,
         question.id,
         question.question_text,

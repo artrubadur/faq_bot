@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -26,7 +25,7 @@ router = Router()
 PARENT_DIR, DIR = USERS_GET
 
 
-class Finding(StatesGroup):
+class UserFinding(StatesGroup):
     waiting_for_identity = State()
 
 
@@ -44,8 +43,9 @@ async def user_get_cb_handler(
     found_username = data.get("glb_found_username", None)
 
     sent_message = await send_enter_identity(
-        callback.message,
+        callback.message,  # pyright: ignore[reportArgumentType]
         SendAction.EDIT,
+        PARENT_DIR,
         DIR,
         found_user_id,
         found_username,
@@ -54,7 +54,7 @@ async def user_get_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Finding.waiting_for_identity)
+    await state.set_state(UserFinding.waiting_for_identity)
 
 
 async def process_identity_handler(
@@ -90,7 +90,7 @@ async def process_identity_handler(
     await state.set_state(None)
 
 
-@router.message(Finding.waiting_for_identity)
+@router.message(UserFinding.waiting_for_identity)
 async def user_get_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -121,5 +121,9 @@ async def user_get_cb_identity_handler(
     input_username = callback_data.username
 
     await process_identity_handler(
-        callback.message, state, input_id, input_username, send_action=SendAction.EDIT
+        callback.message,  # pyright: ignore[reportArgumentType]
+        state,
+        input_id,
+        input_username,
+        send_action=SendAction.EDIT,
     )

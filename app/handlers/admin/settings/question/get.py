@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -26,7 +25,7 @@ router = Router()
 PARENT_DIR, DIR = QUESTIONS_GET
 
 
-class Finding(StatesGroup):
+class QuestionFinding(StatesGroup):
     waiting_for_id = State()
 
 
@@ -41,11 +40,15 @@ async def question_get_cb_handler(
     found_question_id: int | None = data.get("glb_found_question_id", None)
 
     sent_message = await send_enter_id(
-        callback.message, SendAction.EDIT, DIR, found_question_id
+        callback.message,  # pyright: ignore[reportArgumentType]
+        SendAction.EDIT,
+        DIR,
+        PARENT_DIR,
+        found_question_id,
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Finding.waiting_for_id)
+    await state.set_state(QuestionFinding.waiting_for_id)
 
 
 async def process_id_handler(
@@ -58,6 +61,7 @@ async def process_id_handler(
             question = await service.get_question(input_id)
         except NoResultFound:
             await send_not_found(message, send_action, input_id)
+            return
 
     await state.update_data(glb_found_question_id=question.id)
 
@@ -73,7 +77,7 @@ async def process_id_handler(
     await state.set_state(None)
 
 
-@router.message(Finding.waiting_for_id)
+@router.message(QuestionFinding.waiting_for_id)
 async def question_get_msg_id_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -101,5 +105,8 @@ async def question_get_cb_id_handler(
     input_id = callback_data.id
 
     await process_id_handler(
-        callback.message, state, input_id, send_action=SendAction.EDIT
+        callback.message,  # pyright: ignore[reportArgumentType]bb
+        state,
+        input_id,
+        send_action=SendAction.EDIT,
     )

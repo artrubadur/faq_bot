@@ -1,4 +1,3 @@
-# pyright: reportArgumentType=false
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -34,7 +33,7 @@ router = Router()
 PARENT_DIR, DIR = USERS_CREATE
 
 
-class Creation(StatesGroup):
+class UserCreation(StatesGroup):
     waiting_for_identity = State()
     waiting_for_username = State()
     waiting_for_role = State()
@@ -52,15 +51,16 @@ async def user_create_cb_handler(
     found_username = data.get("glb_found_username", None)
 
     sent_message = await send_enter_identity(
-        callback.message,
+        callback.message,  # pyright: ignore[reportArgumentType]
         SendAction.EDIT,
+        PARENT_DIR,
         DIR,
         found_user_id,
         found_username,
     )
     await last_message.set(sent_message, state)
 
-    await state.set_state(Creation.waiting_for_identity)
+    await state.set_state(UserCreation.waiting_for_identity)
 
 
 async def process_identity_handler(
@@ -79,19 +79,19 @@ async def process_identity_handler(
         found_username = data.get("glb_found_username", None)
 
         sent_message = await send_enter_username(
-            message, send_action, DIR, found_username
+            message, send_action, PARENT_DIR, DIR, found_username
         )
         await last_message.set(sent_message, state)
 
-        await state.set_state(Creation.waiting_for_username)
+        await state.set_state(UserCreation.waiting_for_username)
     else:
-        sent_message = await send_select_role(message, send_action, DIR)
+        sent_message = await send_select_role(message, send_action, PARENT_DIR, DIR)
         await last_message.set(sent_message, state)
 
-        await state.set_state(Creation.waiting_for_role)
+        await state.set_state(UserCreation.waiting_for_role)
 
 
-@router.message(Creation.waiting_for_identity)
+@router.message(UserCreation.waiting_for_identity)
 async def user_create_msg_identity_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -130,7 +130,7 @@ async def user_create_cb_identity_handler(
     input_username = callback_data.username
 
     await process_identity_handler(
-        callback.message,
+        callback.message,  # pyright: ignore[reportArgumentType]
         last_message,
         state,
         input_id,
@@ -149,13 +149,13 @@ async def process_username_handler(
 ):
     await state.update_data(tmp_input_username=input_username)
 
-    sent_message = await send_select_role(message, send_action, DIR)
+    sent_message = await send_select_role(message, send_action, PARENT_DIR, DIR)
     await last_message.set(sent_message, state)
 
-    await state.set_state(Creation.waiting_for_role)
+    await state.set_state(UserCreation.waiting_for_role)
 
 
-@router.message(Creation.waiting_for_username)
+@router.message(UserCreation.waiting_for_username)
 async def user_create_msg_username_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -188,7 +188,7 @@ async def user_create_cb_username_handler(
     input_username = callback_data.username
 
     await process_username_handler(
-        callback.message,
+        callback.message,  # pyright: ignore[reportArgumentType]
         last_message,
         state,
         input_username,
@@ -218,7 +218,7 @@ async def process_role_handler(
     await state.set_state(None)
 
 
-@router.message(Creation.waiting_for_role)
+@router.message(UserCreation.waiting_for_role)
 async def user_create_msg_role_handler(
     message: Message, last_message: LastMessage, state: FSMContext
 ):
@@ -251,7 +251,11 @@ async def user_create_cb_role_handler(
     input_role = callback_data.role
 
     await process_role_handler(
-        callback.message, last_message, state, input_role, send_action=SendAction.EDIT
+        callback.message,  # pyright: ignore[reportArgumentType]
+        last_message,
+        state,
+        input_role,
+        send_action=SendAction.EDIT,
     )
 
 
@@ -273,7 +277,7 @@ async def user_create_cb_confirm_handler(callback: CallbackQuery, state: FSMCont
             user = await service.create_user(input_id, input_username, input_role)
             logger.debug("User created", id=user.id)
             await send_successfully_created(
-                callback.message,
+                callback.message,  # pyright: ignore[reportArgumentType]
                 SendAction.EDIT,
                 user.telegram_id,
                 user.username,
@@ -281,5 +285,7 @@ async def user_create_cb_confirm_handler(callback: CallbackQuery, state: FSMCont
             )
         except IntegrityError:
             await send_failed_creation(
-                callback.message, SendAction.EDIT, "User already exists"
+                callback.message,  # pyright: ignore[reportArgumentType]
+                SendAction.EDIT,
+                "User already exists",
             )
