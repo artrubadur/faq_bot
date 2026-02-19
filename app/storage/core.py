@@ -14,8 +14,6 @@ async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit
 async def init_db():
     logger.debug("Initializing the database")
     async with engine.begin() as conn:
-        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        logger.debug("Vector extension created")
         await conn.run_sync(Base.metadata.create_all)
         logger.debug("Tables created")
     logger.info("The database is initialized")
