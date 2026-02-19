@@ -34,7 +34,6 @@ def with_message_action(
     @wraps(func)
     async def inner(message: Message, action: SendAction, *args, **kwargs):
         async def send(*send_args, **send_kwargs):
-            print(send_kwargs)
             return await send_via_action(message, action, *send_args, **send_kwargs)
         return await func(
             send,
