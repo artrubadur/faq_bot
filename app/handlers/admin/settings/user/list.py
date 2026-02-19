@@ -46,19 +46,19 @@ async def process(
         )
         return
 
-    order: str = data["tmp_order"]
-    ascending: bool = data["tmp_ascending"]
-    page: int = data["tmp_page"]
-    page_size: int = data["tmp_page_size"]
+    order: str = data["order"]
+    ascending: bool = data["ascending"]
+    page: int = data["page"]
+    page_size: int = data["page_size"]
 
-    if "tmp_amount" not in data:
+    if "amount" not in data:
         async with async_session() as session:
             repo = UsersRepository(session)
             service = UsersService(repo)
             amount = await service.get_user_amount()
-        await state.update_data(tmp_amount=amount)
+        await state.update_data(amount=amount)
     else:
-        amount = data["tmp_amount"]
+        amount = data["amount"]
 
     max_page = (amount + page_size - 1) // page_size
     page = min(max_page, page)
@@ -92,9 +92,8 @@ async def user_list_cb_handler(
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    await state.update_data(
-        tmp_order="id", tmp_ascending=True, tmp_page=1, tmp_page_size=5
-    )
+    await state.set_data({
+        "order": "id", "ascending": True, "page": 1, "page_size": 5, "in_operation": True})
 
     await process(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -103,7 +102,7 @@ async def user_list_cb_handler(
         send_action=SendAction.EDIT,
     )
 
-    await state.update_data(tmp_in_operation=True)
+    await state.update_data(in_operation=True)
     await state.set_state(UserListing.waiting_for_page)
 
 
@@ -122,7 +121,7 @@ async def user_list_msg_page_handler(
         await last_message.set(sent_message, state)
         return
 
-    await state.update_data(tmp_page=input_page)
+    await state.update_data(page=input_page)
 
     await process(message, last_message, state, send_action=SendAction.ANSWER)
 
@@ -137,8 +136,8 @@ async def user_list_cb_page_handler(
     await callback.answer()
 
     data = await state.get_data()
-    page = max(1, data.get("tmp_page", 1) + callback_data.page)
-    await state.update_data(tmp_page=page)
+    page = max(1, data.get("page", 1) + callback_data.page)
+    await state.update_data(page=page)
 
     await process(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -157,7 +156,7 @@ async def user_list_cb_size_handler(
 ):
     await callback.answer()
 
-    await state.update_data(tmp_page_size=callback_data.size)
+    await state.update_data(page_size=callback_data.size)
 
     await process(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -178,10 +177,10 @@ async def user_list_cb_order_handler(
 
     new_order = callback_data.column
     data = await state.get_data()
-    if data["tmp_order"] == new_order:
-        await state.update_data(tmp_ascending=(not data["tmp_ascending"]))
+    if data["order"] == new_order:
+        await state.update_data(ascending=(not data["ascending"]))
     else:
-        await state.update_data(tmp_order=new_order)
+        await state.update_data(order=new_order)
 
     await process(
         callback.message,  # pyright: ignore[reportArgumentType]

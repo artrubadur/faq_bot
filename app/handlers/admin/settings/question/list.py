@@ -95,7 +95,8 @@ async def question_list_cb_handler(
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    await state.update_data(order="id", ascending=True, page=1, page_size=5)
+    await state.set_data({
+        "order": "id", "ascending": True, "page": 1, "page_size": 5, "in_operation": True})
 
     await process(
         callback.message,  # pyright: ignore[reportArgumentType],
@@ -104,7 +105,6 @@ async def question_list_cb_handler(
         send_action=SendAction.EDIT,
     )
 
-    await state.update_data(in_operation=True)
     await state.set_state(QuestionListing.waiting_for_page)
 
 

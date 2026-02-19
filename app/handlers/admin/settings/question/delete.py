@@ -52,7 +52,7 @@ async def question_get_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data(in_operation=True)
+    await state.update_data({"in_operation": True})
     await state.set_state(QuestionDeletion.waiting_for_id)
 
 

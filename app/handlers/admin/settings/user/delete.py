@@ -53,7 +53,7 @@ async def user_delete_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data(in_operation=True)
+    await state.update_data({"in_operation": True})
     await state.set_state(UserDeletion.waiting_for_identity)
 
 

@@ -50,7 +50,7 @@ async def question_create_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data(in_operation=True)
+    await state.set_data({"in_operation": True})
     await state.set_state(QuestionCreation.waiting_for_question_text)
 
 
