@@ -319,7 +319,7 @@ class FallbackFmt(BaseModel):
 class QuestionFmt(BaseModel):
     id: str = "#️⃣ {id} Question:"
     question_text: str = "🔍 Text: {question_text}"
-    answer_text: str = "💡 Answer: {question_text}"
+    answer_text: str = "💡 Answer: {answer_text}"
     rating: str = "🚀 Rating: {rating}"
     recomputed: str = "🧬 Embedding will be recomputed"
     not_recomputed: str = "🧬 Embedding will NOT be recomputed"

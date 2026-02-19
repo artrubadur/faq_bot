@@ -1,10 +1,10 @@
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
+from app.bot.storage import LSTContext
 from app.core.constants.dirs import USERS_UPDATE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import (
@@ -50,14 +50,14 @@ class UserUpdate(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_update_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    data = await state.get_data()
-    found_user_id: int | None = data.get("glb_found_user_id", None)
-    found_username = data.get("glb_found_username", None)
+    data = await state.storage.get_data(state.key, "long")
+    found_user_id: int | None = data.get("found_user_id", None)
+    found_username: str | None = data.get("found_username", None)
 
     sent_message = await send_enter_identity(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -69,13 +69,13 @@ async def user_update_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data(tmp_in_operation=True)
+    await state.update_data(in_operation=True)
     await state.set_state(UserUpdate.waiting_for_identity)
 
 
 async def process_identity_handler(
     message: Message,
-    state: FSMContext,
+    state: LSTContext,
     input_id: int,
     input_username: str | None,
     *,
@@ -92,9 +92,9 @@ async def process_identity_handler(
         return
 
     await state.update_data(
-        tmp_orig_id=user.telegram_id,
-        tmp_orig_username=user.username,
-        tmp_orig_role=user.role,
+        orig_id=user.telegram_id,
+        orig_username=user.username,
+        orig_role=user.role,
     )
     await send_confirm_update(
         message,
@@ -108,7 +108,7 @@ async def process_identity_handler(
 
 @router.message(UserUpdate.waiting_for_identity)
 async def user_update_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -128,7 +128,7 @@ async def user_update_msg_identity_handler(
 
 @router.callback_query(IdentityCallback.filter(F.dir == DIR))
 async def user_update_cb_identity_handler(
-    callback: CallbackQuery, callback_data: IdentityCallback, state: FSMContext
+    callback: CallbackQuery, callback_data: IdentityCallback, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -146,7 +146,7 @@ async def user_update_cb_identity_handler(
 
 
 async def process_fields_handler(
-    message: Message, state: FSMContext, *, send_action: SendAction
+    message: Message, state: LSTContext, *, send_action: SendAction
 ):
     data = await state.get_data()
     if is_expired(data):
@@ -159,12 +159,12 @@ async def process_fields_handler(
         await state.set_state(None)
         return
     
-    id: int = data["tmp_orig_id"]
-    username: str | None = data["tmp_orig_username"]
-    role: str = data["tmp_orig_role"]
+    id: int = data["orig_id"]
+    username: str | None = data["orig_username"]
+    role: str = data["orig_role"]
 
-    edited_username: str | None = data.get("tmp_edited_username", username)
-    edited_role: str = data.get("tmp_edited_role", role)
+    edited_username: str | None = data.get("edited_username", username)
+    edited_role: str = data.get("edited_role", role)
 
     await send_changes(
         message,
@@ -181,7 +181,7 @@ async def process_fields_handler(
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
 async def user_update_confirm_cb_fields_handler(
-    callback: CallbackQuery, state: FSMContext
+    callback: CallbackQuery, state: LSTContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -193,7 +193,7 @@ async def user_update_confirm_cb_fields_handler(
 
 @router.callback_query(CancelCallback.filter(F.dir == DIR))
 async def user_update_cancel_cb_fields_handler(
-    callback: CallbackQuery, state: FSMContext
+    callback: CallbackQuery, state: LSTContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -205,7 +205,7 @@ async def user_update_cancel_cb_fields_handler(
 
 @router.callback_query(BackCallback.filter(F.dir == DIR))
 async def user_update_back_cb_fields_handler(
-    callback: CallbackQuery, state: FSMContext
+    callback: CallbackQuery, state: LSTContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -217,13 +217,12 @@ async def user_update_back_cb_fields_handler(
 
 @router.callback_query(EditCallback.filter((F.dir == DIR) & (F.field == "username")))
 async def user_update_cb_edit_username_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    data = await state.get_data()
-    found_username = data.get("glb_found_username", None)
+    found_username: str | None = await state.storage.get_value(state.key, "found_username", None, "long")
 
     sent_message = await send_enter_username(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -239,7 +238,7 @@ async def user_update_cb_edit_username_handler(
 
 @router.message(UserUpdate.waiting_for_username)
 async def user_update_msg_edited_username_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -250,20 +249,20 @@ async def user_update_msg_edited_username_handler(
         await last_message.set(sent_message, state)
         return
 
-    await state.update_data(tmp_edited_username=input_username)
+    await state.update_data(edited_username=input_username)
 
     await process_fields_handler(message, state, send_action=SendAction.ANSWER)
 
 
 @router.callback_query(UsernameCallback.filter(F.dir == DIR))
 async def user_update_cb_edited_username_handler(
-    callback: CallbackQuery, callback_data: UsernameCallback, state: FSMContext
+    callback: CallbackQuery, callback_data: UsernameCallback, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
 
     input_username = callback_data.username
-    await state.update_data(tmp_edited_username=input_username)
+    await state.update_data(edited_username=input_username)
 
     await process_fields_handler(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -274,7 +273,7 @@ async def user_update_cb_edited_username_handler(
 
 @router.callback_query(EditCallback.filter((F.dir == DIR) & (F.field == "role")))
 async def user_update_msg_edit_role_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -292,7 +291,7 @@ async def user_update_msg_edit_role_handler(
 
 @router.message(UserUpdate.waiting_for_role)
 async def user_update_msg_edited_role_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -303,20 +302,20 @@ async def user_update_msg_edited_role_handler(
         await last_message.set(sent_message, state)
         return
 
-    await state.update_data(tmp_edited_role=input_role)
+    await state.update_data(edited_role=input_role)
 
     await process_fields_handler(message, state, send_action=SendAction.ANSWER)
 
 
 @router.callback_query(RoleCallback.filter(F.dir == DIR))
 async def user_update_cb_edited_role_handler(
-    callback: CallbackQuery, callback_data: RoleCallback, state: FSMContext
+    callback: CallbackQuery, callback_data: RoleCallback, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
 
     input_role = callback_data.role
-    await state.update_data(tmp_edited_role=input_role)
+    await state.update_data(edited_role=input_role)
 
     await process_fields_handler(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -326,7 +325,7 @@ async def user_update_cb_edited_role_handler(
 
 
 @router.callback_query(SaveCallback.filter(F.dir == DIR))
-async def user_update_cb_save_handler(callback: CallbackQuery, state: FSMContext):
+async def user_update_cb_save_handler(callback: CallbackQuery, state: LSTContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
@@ -341,11 +340,11 @@ async def user_update_cb_save_handler(callback: CallbackQuery, state: FSMContext
         await state.set_state(None)
         return
     
-    id: int = data.pop("tmp_orig_id")
-    username: str | None = data.pop("tmp_orig_username")
-    role: str = data.pop("tmp_orig_role")
-    edited_username: str | None = data.pop("tmp_edited_username", username)
-    edited_role: str = data.pop("tmp_edited_role", role)
+    id: int = data.pop("orig_id")
+    username: str | None = data.pop("orig_username")
+    role: str = data.pop("orig_role")
+    edited_username: str | None = data.pop("edited_username", username)
+    edited_role: str = data.pop("edited_role", role)
     await state.set_data(data)
 
     try:

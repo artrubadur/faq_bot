@@ -1,10 +1,10 @@
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
+from app.bot.storage import LSTContext
 from app.core.constants.dirs import QUESTIONS_GET
 from app.dialogs import SendAction
 from app.dialogs.rows.question import IdCallback
@@ -31,13 +31,14 @@ class QuestionFinding(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def question_get_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    data = await state.get_data()
-    found_question_id: int | None = data.get("glb_found_question_id", None)
+    found_question_id: int | None = await state.storage.get_value(
+        state.key, "found_question_id", None, "long"
+    )
 
     sent_message = await send_enter_id(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -52,7 +53,7 @@ async def question_get_cb_handler(
 
 
 async def process_id_handler(
-    message: Message, state: FSMContext, input_id: int, *, send_action: SendAction
+    message: Message, state: LSTContext, input_id: int, *, send_action: SendAction
 ):
     try:
         async with async_session() as session:
@@ -64,7 +65,9 @@ async def process_id_handler(
         await state.set_state(None)
         return
 
-    await state.update_data(glb_found_question_id=question.id)
+    await state.storage.update_data(
+        state.key, {"found_question_id": question.id}, "long"
+    )
 
     logger.debug("Question obtained", id=question.id)
     await send_successfully_found(
@@ -80,7 +83,7 @@ async def process_id_handler(
 
 @router.message(QuestionFinding.waiting_for_id)
 async def question_get_msg_id_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -98,7 +101,7 @@ async def question_get_msg_id_handler(
 
 @router.callback_query(IdCallback.filter(F.dir == DIR))
 async def question_get_cb_id_handler(
-    callback: CallbackQuery, callback_data: IdCallback, state: FSMContext
+    callback: CallbackQuery, callback_data: IdCallback, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)

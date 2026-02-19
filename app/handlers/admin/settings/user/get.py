@@ -1,10 +1,10 @@
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
+from app.bot.storage import LSTContext
 from app.core.constants.dirs import USERS_GET
 from app.dialogs import SendAction
 from app.dialogs.rows.user import IdentityCallback
@@ -31,16 +31,16 @@ class UserFinding(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_get_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
     sender_id = callback.from_user.id
     sender_username = callback.from_user.username
-    data = await state.get_data()
-    found_user_id: int | None = data.get("glb_found_user_id", None)
-    found_username = data.get("glb_found_username", None)
+    data = await state.storage.get_data(state.key, "long")
+    found_user_id: int | None = data.get("found_user_id", None)
+    found_username: str | None = data.get("found_username", None)
 
     sent_message = await send_enter_identity(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -59,7 +59,7 @@ async def user_get_cb_handler(
 
 async def process_identity_handler(
     message: Message,
-    state: FSMContext,
+    state: LSTContext,
     input_id: int,
     input_username: str | None,
     *,
@@ -71,16 +71,17 @@ async def process_identity_handler(
             service = UsersService(repo)
             user = await service.get_user(input_id)
     except NoResultFound:
-        await state.update_data(
-            glb_found_user_id=input_id, glb_found_username=input_username
+        await state.storage.update_data(
+            state.key, {"found_user_id":input_id, "found_username": input_username}, "long"
         )
         logger.debug("User partially obtained", id=user.id)
         await send_partially_found(message, send_action, input_id, input_username)
         await state.set_state(None)
         return
     
-    await state.update_data(
-        glb_found_user_id=user.telegram_id, glb_found_username=user.username
+
+    await state.storage.update_data(
+            state.key, {"found_user_id":user.telegram_id, "found_username": user.username}, "long"
     )
     logger.debug("User obtained", id=user.id)
     await send_successfully_found(
@@ -96,7 +97,7 @@ async def process_identity_handler(
 
 @router.message(UserFinding.waiting_for_identity)
 async def user_get_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -116,7 +117,7 @@ async def user_get_msg_identity_handler(
 
 @router.callback_query(IdentityCallback.filter(F.dir == DIR))
 async def user_get_cb_identity_handler(
-    callback: CallbackQuery, callback_data: IdentityCallback, state: FSMContext
+    callback: CallbackQuery, callback_data: IdentityCallback, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)

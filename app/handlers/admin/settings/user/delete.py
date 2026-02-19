@@ -1,10 +1,10 @@
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
+from app.bot.storage import LSTContext
 from app.core.constants.dirs import USERS_DELETE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import ConfirmCallback
@@ -34,14 +34,14 @@ class UserDeletion(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_delete_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    data = await state.get_data()
-    found_user_id: int | None = data.get("glb_found_user_id", None)
-    found_username: str | None = data.get("glb_found_username", None)
+    data = await state.storage.get_data(state.key, "long")
+    found_user_id: int | None = data.get("found_user_id", None)
+    found_username: str | None = data.get("found_username", None)
 
     sent_message = await send_enter_identity(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -53,13 +53,13 @@ async def user_delete_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data(tmp_in_operation=True)
+    await state.update_data(in_operation=True)
     await state.set_state(UserDeletion.waiting_for_identity)
 
 
 async def process_identity_handler(
     message: Message,
-    state: FSMContext,
+    state: LSTContext,
     input_id: int,
     input_username: str | None,
     *,
@@ -75,7 +75,7 @@ async def process_identity_handler(
         await state.set_state(None)
         return
 
-    await state.update_data(tmp_input_id=input_id)
+    await state.update_data(input_id=input_id)
     await send_confirm_deletion(
         message,
         send_action,
@@ -88,7 +88,7 @@ async def process_identity_handler(
 
 @router.message(UserDeletion.waiting_for_identity)
 async def user_delete_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -108,7 +108,7 @@ async def user_delete_msg_identity_handler(
 
 @router.callback_query(IdentityCallback.filter(F.dir == DIR))
 async def user_delete_cb_identity_handler(
-    callback: CallbackQuery, callback_data: IdentityCallback, state: FSMContext
+    callback: CallbackQuery, callback_data: IdentityCallback, state: LSTContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -126,7 +126,7 @@ async def user_delete_cb_identity_handler(
 
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
-async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: FSMContext):
+async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: LSTContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
@@ -141,7 +141,7 @@ async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: FSMCont
         await state.set_state(None)
         return
     
-    input_id: int = data.pop("tmp_input_id", None)
+    input_id: int = data.pop("input_id", None)
     await state.set_data(data)
 
     try:

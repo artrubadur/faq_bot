@@ -1,25 +1,25 @@
 from contextvars import ContextVar
 
 from aiogram import Bot
-from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, Message
+
+from app.bot.storage import LSTContext
 
 
 class LastMessage:
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    async def set(self, message: Message, state: FSMContext):
-        await state.update_data(glb_last_bot_message_id=message.message_id)
+    async def set(self, message: Message, state: LSTContext):
+        await state.storage.update_data(state.key, {"last_bot_message_id": message.message_id}, "long")
 
-    async def get_id(self, state: FSMContext) -> int | None:
-        data = await state.get_data()
-        return data.get("glb_last_bot_message_id", None)
+    async def get_id(self, state: LSTContext) -> int | None:
+        return await state.storage.get_value(state.key, "last_bot_message_id", None, "long")
 
     async def edit_reply_markup(
         self,
         message: Message,
-        state: FSMContext,
+        state: LSTContext,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> bool:
         message_id = await self.get_id(state)
@@ -40,7 +40,7 @@ class LastMessage:
     async def delete(
         self,
         message: Message,
-        state: FSMContext,
+        state: LSTContext,
     ) -> bool:
         message_id = await self.get_id(state)
 

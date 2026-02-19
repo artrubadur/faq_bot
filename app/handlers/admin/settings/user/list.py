@@ -1,9 +1,9 @@
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
+from app.bot.storage import LSTContext
 from app.core.constants.dirs import USERS_LIST
 from app.dialogs.actions import SendAction
 from app.dialogs.rows.common import (
@@ -32,7 +32,7 @@ class UserListing(StatesGroup):
 async def process(
     message: Message,
     last_message: LastMessage,
-    state: FSMContext,
+    state: LSTContext,
     *,
     send_action: SendAction
 ):
@@ -88,7 +88,7 @@ async def process(
 
 @router.callback_query(F.data == DIR)
 async def user_list_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -110,7 +110,7 @@ async def user_list_cb_handler(
 
 @router.message(UserListing.waiting_for_page)
 async def user_list_msg_page_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.delete(message, state)
 
@@ -133,7 +133,7 @@ async def user_list_cb_page_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: PaginPageCallback,
-    state: FSMContext,
+    state: LSTContext,
 ):
     await callback.answer()
 
@@ -154,7 +154,7 @@ async def user_list_cb_size_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: PaginSizeCallback,
-    state: FSMContext,
+    state: LSTContext,
 ):
     await callback.answer()
 
@@ -173,7 +173,7 @@ async def user_list_cb_order_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: PaginOrderCallback,
-    state: FSMContext,
+    state: LSTContext,
 ):
     await callback.answer()
 

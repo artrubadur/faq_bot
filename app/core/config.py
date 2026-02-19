@@ -38,7 +38,8 @@ class Config(BaseSettings):
 
     redis_host: str
     redis_pass: str
-    redis_ttl: int
+    redis_long_ttl: int
+    redis_short_ttl: int
 
     yc_folder_id: str
     yc_api_key: str

@@ -1,10 +1,10 @@
 from aiogram import F, Router
-from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
 
+from app.bot.storage import LSTContext
 from app.core.constants.dirs import USERS_CREATE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import ConfirmCallback
@@ -42,14 +42,14 @@ class UserCreation(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_create_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: FSMContext
+    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
-    data = await state.get_data()
-    found_user_id: int | None = data.get("glb_found_user_id", None)
-    found_username = data.get("glb_found_username", None)
+    data = await state.storage.get_data(state.key, "long")
+    found_user_id: int | None = data.get("found_user_id", None)
+    found_username: str | None = data.get("found_username", None)
 
     sent_message = await send_enter_identity(
         callback.message,  # pyright: ignore[reportArgumentType]
@@ -61,24 +61,24 @@ async def user_create_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data(tmp_in_operation=True)
+    await state.update_data(in_operation=True)
     await state.set_state(UserCreation.waiting_for_identity)
 
 
 async def process_identity_handler(
     message: Message,
     last_message: LastMessage,
-    state: FSMContext,
+    state: LSTContext,
     input_id: int,
     input_username: str | None,
     *,
     send_action: SendAction,
 ):
-    await state.update_data(tmp_input_id=input_id, tmp_input_username=input_username)
+    await state.update_data(input_id=input_id, input_username=input_username)
 
     if input_username is None:
         data = await state.get_data()
-        found_username = data.get("glb_found_username", None)
+        found_username = data.get("found_username", None)
 
         sent_message = await send_enter_username(
             message, send_action, PARENT_DIR, DIR, found_username
@@ -95,7 +95,7 @@ async def process_identity_handler(
 
 @router.message(UserCreation.waiting_for_identity)
 async def user_create_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -123,7 +123,7 @@ async def user_create_cb_identity_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: IdentityCallback,
-    state: FSMContext,
+    state: LSTContext,
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -144,12 +144,12 @@ async def user_create_cb_identity_handler(
 async def process_username_handler(
     message: Message,
     last_message: LastMessage,
-    state: FSMContext,
+    state: LSTContext,
     input_username: str | None,
     *,
     send_action: SendAction,
 ):
-    await state.update_data(tmp_input_username=input_username)
+    await state.update_data(input_username=input_username)
 
     sent_message = await send_select_role(message, send_action, PARENT_DIR, DIR)
     await last_message.set(sent_message, state)
@@ -159,7 +159,7 @@ async def process_username_handler(
 
 @router.message(UserCreation.waiting_for_username)
 async def user_create_msg_username_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -182,7 +182,7 @@ async def user_create_cb_username_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: UsernameCallback,
-    state: FSMContext,
+    state: LSTContext,
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -201,12 +201,12 @@ async def user_create_cb_username_handler(
 async def process_role_handler(
     message: Message,
     last_message: LastMessage,
-    state: FSMContext,
+    state: LSTContext,
     input_role: str,
     *,
     send_action: SendAction,
 ):
-    await state.update_data(tmp_input_role=input_role)
+    await state.update_data(input_role=input_role)
 
     data = await state.get_data()
     if is_expired(data):
@@ -219,8 +219,8 @@ async def process_role_handler(
         await state.set_state(None)
         return
     
-    input_id: int = data["tmp_input_id"]
-    input_username: str | None = data["tmp_input_username"]
+    input_id: int = data["input_id"]
+    input_username: str | None = data["input_username"]
 
     sent_message = await send_confirm_creation(
         message, send_action, input_id, input_username, input_role
@@ -232,7 +232,7 @@ async def process_role_handler(
 
 @router.message(UserCreation.waiting_for_role)
 async def user_create_msg_role_handler(
-    message: Message, last_message: LastMessage, state: FSMContext
+    message: Message, last_message: LastMessage, state: LSTContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -255,7 +255,7 @@ async def user_create_cb_role_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: RoleCallback,
-    state: FSMContext,
+    state: LSTContext,
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -272,7 +272,7 @@ async def user_create_cb_role_handler(
 
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
-async def user_create_cb_confirm_handler(callback: CallbackQuery, state: FSMContext):
+async def user_create_cb_confirm_handler(callback: CallbackQuery, state: LSTContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
@@ -287,9 +287,9 @@ async def user_create_cb_confirm_handler(callback: CallbackQuery, state: FSMCont
         await state.set_state(None)
         return
     
-    input_id: int = data.pop("tmp_input_id")
-    input_username: str | None = data.pop("tmp_input_username")
-    input_role: str = data.pop("tmp_input_role")
+    input_id: int = data.pop("input_id")
+    input_username: str | None = data.pop("input_username")
+    input_role: str = data.pop("input_role")
     await state.set_data(data)
 
     try:
