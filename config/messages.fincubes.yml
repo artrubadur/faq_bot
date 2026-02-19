@@ -1,3 +1,5 @@
+parse_mode: html # / markdown / None
+
 responses:
   public:
     start: >

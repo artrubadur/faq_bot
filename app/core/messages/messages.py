@@ -118,9 +118,9 @@ class QuestionAdmRsp(BaseModel):
 
 
 class SettingsAdmRsp(BaseModel):
-    main: str = "{emoji.menu.settings} Settings"
-    user: str = "{emoji.menu.users} User"
-    question: str = "{emoji.menu.question} Question"
+    main: str = "⚙ Settings"
+    user: str = "👤 User"
+    question: str = "📚 Question"
 
 
 class GotoMscAdmRsp(BaseModel):
@@ -306,9 +306,10 @@ class FieldFmt(BaseModel):
     user_link: str = "<a href='tg://user?id={id}'>@{username}</a>"
     user_role: str = "<b>{user_role}</b>"
 
+    date: str = "%d.%m.%Y %H:%M"
+
 
 class FallbackFmt(BaseModel):
-    first_name: str = "N/A"
     last_name: str = ""
     username: str = ""
     exception: str = ""
@@ -325,9 +326,9 @@ class QuestionFmt(BaseModel):
 
 class UserFmt(BaseModel):
     id: str = "ID: {id}"
-    username: str = "Username {username}"
-    user_link: str = "Link {user_link}"
-    user_role: str = "Role {user_role}"
+    username: str = "Username: {username}"
+    user_link: str = "Link: {user_link}"
+    user_role: str = "Role: {user_role}"
 
 
 class EditFmt(BaseModel):

@@ -117,8 +117,9 @@ async def send_found_similar(
     question_text: str,
 ) -> Message:
     return await send(
-        text=messages.exceptions.question.similar.format(
-            question=format_question(id, question_text)
+        text=format_exception(
+            messages.exceptions.question.similar,
+            question=format_question(id, question_text),
         ),
         parse_mode=messages.parse_mode,
         reply_markup=mu.confirm_similar,

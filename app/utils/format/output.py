@@ -10,18 +10,18 @@ from app.storage.models.user import User
 def format_response(text: str, message: Message, **kwargs):
     return text.format(
         id=message.from_user.id,
-        first_name=message.from_user.first_name or messages.format.fallback.first_name,
+        first_name=message.from_user.first_name,
         last_name=message.from_user.last_name or messages.format.fallback.last_name,
         username=message.from_user.username or messages.format.fallback.username,
         full_name=message.from_user.full_name,
-        date=message.date.strftime("%d.%m.%Y %H:%M"),
+        date=message.date.strftime(messages.format.field.date),
         **kwargs,
     )
 
 
-def format_exception(exception: str | None = None):
+def format_exception(exception: str | None = None, **kwargs):
     return messages.format.field.exception.format(
-        exception=exception or messages.format.fallback.exception
+        exception=exception or messages.format.fallback.exception, **kwargs
     )
 
 

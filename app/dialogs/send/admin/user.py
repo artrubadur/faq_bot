@@ -38,7 +38,7 @@ async def send_enter_identity(
     )
     return await send(
         text=messages.responses.admin.user.enter.identity,
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=reply_markup,
     )
 
@@ -59,7 +59,7 @@ async def send_enter_username(
     )
     return await send(
         text=messages.responses.admin.user.enter.username,
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=reply_markup,
     )
 
@@ -73,7 +73,7 @@ async def send_select_role(
     )
     return await send(
         text=messages.responses.admin.user.enter.role,
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=reply_markup,
     )
 
@@ -90,7 +90,7 @@ async def send_confirm_creation(
         text=messages.responses.admin.user.creation.confirm.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.confirm_creation,
     )
 
@@ -106,7 +106,7 @@ async def send_successfully_created(
         text=messages.responses.admin.user.creation.successful.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.back,
     )
 
@@ -117,14 +117,13 @@ async def send_already_exists(
 ) -> Message:
     return await send(
         text=format_exception(
-            messages.exceptions.user.already_exists.format(
-                id=format_id(id), username=format_username(username)
-            )
+            messages.exceptions.user.already_exists,
+            id=format_id(id),
+            username=format_username(username),
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.back,
     )
-
 
 # Finding
 @with_message_action
@@ -138,7 +137,7 @@ async def send_successfully_found(
         text=messages.responses.admin.user.finding.successful.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.back,
     )
 
@@ -154,7 +153,7 @@ async def send_partially_found(
         text=messages.responses.admin.user.finding.partially_found.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.back,
     )
 
@@ -164,12 +163,13 @@ async def send_not_found(
     send: Callable[..., Awaitable[Message]], id: int, username: str | None = None
 ) -> Message:
     return await send(
-        text=messages.exceptions.user.not_found.format(
+        text=format_exception(
+            messages.exceptions.user.not_found,
             identity=(
                 format_username(username) if username is not None else format_id(id)
-            )
+            ),
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.back,
     )
 
@@ -186,7 +186,7 @@ async def send_confirm_deletion(
         text=messages.responses.admin.user.deletion.confirm.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.confirm_deletion,
     )
 
@@ -202,7 +202,7 @@ async def send_successfully_deleted(
         text=messages.responses.admin.user.deletion.successful.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.back,
     )
 
@@ -219,7 +219,7 @@ async def send_confirm_update(
         text=messages.responses.admin.user.update.confirm.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.confirm_update,
     )
 
@@ -238,7 +238,7 @@ async def send_changes(
         text=messages.responses.admin.user.update.select_field.format(
             user=changes_text
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.field_save_update,
     )
 
@@ -254,7 +254,7 @@ async def send_successfully_updated(
         text=messages.responses.admin.user.update.successful.format(
             user=format_user(id=id, username=username, role=role)
         ),
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
         reply_markup=mu.back,
     )
 
@@ -288,7 +288,7 @@ async def send_pagination(
     return await send(
         text=text,
         reply_markup=reply_markup,
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
     )
 
 
@@ -299,5 +299,5 @@ async def send_empty_pagination(
     return await send(
         text=messages.responses.admin.user.listing.not_found,
         reply_markup=mu.back,
-        prase_mode=messages.parse_mode,
+        parse_mode=messages.parse_mode,
     )

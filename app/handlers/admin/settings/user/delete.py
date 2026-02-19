@@ -40,7 +40,7 @@ async def user_delete_cb_handler(
 
     data = await state.get_data()
     found_user_id: int | None = data.get("glb_found_user_id", None)
-    found_username = data.get("glb_found_username", None)
+    found_username: str | None = data.get("glb_found_username", None)
 
     sent_message = await send_enter_identity(
         callback.message,  # pyright: ignore[reportArgumentType]

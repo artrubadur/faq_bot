@@ -2,10 +2,12 @@ from aiogram import Router
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 
+from app.core.messages import messages
+
 router = Router()
 
 
 @router.message(Command("error"))
 async def cmd_handler(message: Message, command: CommandObject):
-    text = command.args or "Simulated exception"
+    text = command.args or messages.format.fallback.exception
     raise Exception(text)

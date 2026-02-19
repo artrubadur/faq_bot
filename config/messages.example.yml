@@ -1,101 +1,105 @@
-parse_mode: html # / markdown / None
+parse_mode: html # / markdown / null
 
 
-responses: # -(app.dialog.send)
+responses: # Messages sent to regular users
   public:
-    start: > # < message
+    start: > # Welcome message < message
       Hello, {first_name}! I will help you find the answer — just send a question
       or choose one of the most popular ones below!
-    failed: "{exception}. Try to reformulate it and ask again" # < message, exception
-    error: > # < message
+    # When question processing fails < message
+    failed: "{exception}. Try to reformulate it and ask again"
+    error: > # < Internal error notification < message
       {emoji.status.failed} Unexcepted internal error!
       We are already fixing it. Try to retry
+    # "message" variable representes id (user id), first_name,
+    # last_name, username, full_name, date
 
-  admin:
+  admin: # Messages sent to administrators, organized by entity:
     invalid: "{emoji.status.warning} {exception}. Retry or back"
-    user:
-      enter:
+    user: # User flows
+      enter: 
         identity: "{emoji.action.enter} Enter the telegram id, share contact or forward a message"
         username: "{emoji.action.enter} Enter a username"
         role: "{emoji.action.select} Select a role:"
       creation: 
-        confirm: | # < user (fmt)
+        confirm: | # < user
           {emoji.action.select} Confirm creation?
           {user}
-        successful: | # < user (fmt)
+        successful: | # < user
           {emoji.status.successful} User has been successfully created:
           {user}
       finding:
-        successful: | # < user (fmt)
+        successful: | # < user
           {emoji.status.successful} The user has been successfully found in the database:
           {user}
-        partially_found: | # < user (fmt)
+        partially_found: | # < user
           {emoji.status.warning} The user has been partially found but missing in the database:
           {user}
       update:
-        confirm: | # < user (fmt)
+        confirm: | # < user
           {emoji.action.select} Update this user?
           {user}
-        select_field: | # < user (edit fmt)
+        select_field: | # < user
           {user}
           {emoji.action.select} Select the field to edit:
-        successful: | # < user (fmt)
+        successful: | # < user
           {emoji.status.successful} The user has been successfully updated:
           {user}
       deletion:
-        confirm: | # < user (fmt)
+        confirm: | # < user 
           {emoji.action.select} Confirm deletion?
           {user}
-        successful: | # < user (fmt)
+        successful: | # < user
           {emoji.status.successful} Next user has been successfully deleted:
           {user}
       listing:
-          successful: | # < content (table)
+          successful: | # < content - table of users
             {emoji.action.list} User list: {page}/{max_page}
             <pre>{content}</pre>
           not_found: "{emoji.action.list} No users found in the system"
 
-    question:
+    question: # Question flows
       enter:
         id: "{emoji.action.enter} Enter the question id"
         question_text: "{emoji.action.enter} Enter a question text"
         answer_text: "{emoji.action.enter} Enter a answer text"
         rating: "{emoji.action.enter} Enter a rating"
       creation:
-        confirm: | # < question (fmt)
+        confirm: | # < question
           {emoji.action.select} Confirm creation?
           {question}
-        successful: | # < question (fmt)
+        successful: | # < question
           {emoji.status.successful} Question has been successfully created:
           {question}
-        similar: | # < question (fmt)
+        similar: | # When similar question exists < question
           {emoji.status.warning} A similar question already exists:
           {question}
           {emoji.action.select} Confirm creation?
       finding:
-        successful: | # < question (fmt)
+        successful: | # < question
           {emoji.status.successful} The question has been successfully found:
           {question}
       update:
-        confirm: | # < question (fmt)
+        confirm: | # < question
           {emoji.action.select} Update this question?
           {question}
-        select_field: | # < question (edit fmt)
+        select_field: | # < question
           {question}
           {emoji.action.select} Select the field to edit:
+        # For embedding recalculation
         confirm_recompute: "{emoji.action.select} Recompute embedding?"
-        successful: | # < question (fmt)
+        successful: |
           {emoji.status.successful} The question has been successfully updated:
           {question}
       deletion:
-        confirm: | # < question (fmt)
+        confirm: | # < question
           {emoji.action.select} Confirm deletion?
           {question}
-        successful: | # < question (fmt)
+        successful: | # < question
           {emoji.status.successful} Next question has been successfully deleted:
           {question}
       listing:
-        successful: | # < content (table)
+        successful: | # < content - table of question
           {emoji.action.list} Question list: {page}/{max_page}
           <pre>{content}</pre>
         not_found: "{emoji.action.list} No questions found in the system"
@@ -108,103 +112,103 @@ responses: # -(app.dialog.send)
     misc:
       goto:
         go: "Go!"
-        confirm: "{emoji.action.select} Go to <code>{content}</code>?" # < content (path)
+        confirm: "{emoji.action.select} Go to <code>{content}</code>?" # < content - path
       state:
-        serialization: '<pre><code class="json">{content}</code></pre>' # < content (state)
-        argument: "<code>{content}</code>" # < content (argument)
+        serialization: '<pre><code class="json">{content}</code></pre>' # < content - state
+        argument: "<code>{content}</code>" # < content - argument formatting
 
-exceptions: # -(app.handlers)
-  search: # // as failed
-    not_found: "It seems that we failed to understand the question" # < message
+exceptions: # Error messages shown to user
+  search:
+    not_found: "It seems that we failed to understand the question"
 
-  user: # // as invalid
-    not_found: "{emoji.status.failed} User {identity} not found" # < identity (fmt)
-    already_exists: "A user with the ID {id} or the username {username} already exists" # < id (fmt), username (fmt)
+  user:
+    not_found: "{emoji.status.failed} User {identity} not found" # < identity
+    already_exists: "A user with the ID {id} or the username {username} already exists" # < id, username
 
-  question: # // as invalid
-    not_found: "{emoji.status.failed} Question {id} not found" # < id (fmt)
+  question:
+    not_found: "{emoji.status.failed} Question {id} not found" # < id
     embedding_failed: "Failed to compute vector representation of question"
 
   misc:
     invalid_path: "Failed to go: The path is not set"
-    invalid_changes: "Pass changes with the <code>key=value</code> format" # < exception
-    invalid_argument: "Invalid argument: {exception}" # < exception 
+    invalid_changes: "Pass changes with the <code>key=value</code> format"
+    invalid_argument: "Invalid argument: {exception}" # < exception
 
-process: # -(app.services.*.process)
-  common:
+process: # Messages shown during input processing
+  common: # Invalid pagination input
     page_invalid: "Message type is invalid"
 
-  user:
+  user: # Invalid user input formats
     contact_invalid: "The account is hidden or the user is not registered"
     identity_invalid: "Please send a simple text message with ID, contact or forward the message"
     username_invalid: "Please send a simple text message with the username"
     role_invalid: "Please send a simple text message with the role or choose one from the list"
 
-  question:
+  question: # Invalid question input formats
     id_invalid: "Please send a simple text message with ID"
     msg_question_text_invalid: "Please send a simple text message with the question" # + -(app.handlers.public)
     cmd_question_text_invalid: "Please specify the question text after the command" # -(app.handlers.public)
     answer_text_invalid: "Please send a simple text message with the answer to the question"
     rating_invalid: "Please send a simple text message with the rating"
 
-validation: # -(app.services.*.validation)
-  common:
+validation: # Messages for data integrity validation
+  common: # Pagination errors
     page_invalid: "Page is invalid"
     page_negative: "Page cannot be negative"
 
-  user:
+  user: # Username length/symbol validation
     id_invalid: "ID is invalid"
     username_short: "The username is too short"
     username_long: "The username is too long"
     username_unexcepted_symbols: "The username has unexcepted symbols"
     role_unexcepted: "An unexpected role"
     
-  question:
+  question: # Text length and rating validation
     id_invalid: "ID is invalid"
-    question_text_long: "The question text is too long" # + -(app.handlers.public)
+    question_text_long: "The question text is too long"
     answer_text_long: "The answer text is too long"
     rating_incorrect: "Rating is incorrect"
 
-format:  # -(app.utils.format)
+format: # Templates for consistent data presentation
   field:
     id: "<code>{id}</code>" # < id
-    exception: "{emoji.status.failed} {exception}" # < exception (fb)
+    exception: "{emoji.status.failed} {exception}" # < exception
     question_text: "{question_text}" # < question_text
     answer_text: "{answer_text}" # < answer_text
     rating: "{rating}" # < rating
-    username: "<code>@{username}</code>" # < username (fb)
-    user_link: "<a href='tg://user?id={id}'>@{username}</a>" # < id, username (fb)
+    username: "<code>@{username}</code>" # < username
+    user_link: "<a href='tg://user?id={id}'>@{username}</a>" # < id, username
     user_role: "<b>{user_role}</b>" # < role
+    date: "%d.%m.%Y %H:%M"
 
   fallback: # Fallback message data -(app.utils.format)
-    first_name: "N/A" # > message, format
-    last_name: "" # > message, format
-    username: "" # > message, format
-    exception: "" # > format
+    last_name: ""
+    username: ""
+    exception: "Unexcepted error"
     
-  user:
-      id: "ID: {id}" # < id (fmt)
-      username: "Username {username}" # < username (fmt)
-      user_link: "Link {user_link}" # < user_link (fmt)
-      user_role: "Role {user_role}" # < user_role
+  user: # Complete user representation
+      id: "ID: {id}" # < id
+      username: "Username: {username}" # < username
+      user_link: "Link: {user_link}" # < user_link
+      user_role: "Role: {user_role}" # < user_role
       
-  question:
-    id: "{emoji.symbol.index} {id} Question:" # < id (fmt)
-    question_text: "{emoji.symbol.question} Text: {question_text}" # < question_text (fmt)
-    answer_text: "{emoji.symbol.answer} Answer: {answer_text}" # < answer_text (fmt)
-    rating: "{emoji.symbol.rating} Rating: {rating}" # < rating (fmt)
+  question: # Complete question representation
+    id: "{emoji.symbol.index} {id} Question:" # < id
+    question_text: "{emoji.symbol.question} Text: {question_text}" # < question_text
+    answer_text: "{emoji.symbol.answer} Answer: {answer_text}" # < answer_text
+    rating: "{emoji.symbol.rating} Rating: {rating}" # < rating
     recomputed: "{emoji.symbol.embedding} Embedding will be recomputed" 
     not_recomputed: "{emoji.symbol.embedding} Embedding will NOT be recomputed"
 
-  edit:
-    unedited: "{old}" # old
-    edited: "{old} {emoji.symbol.change} {new}" # old, new
+  edit: # Shows changes during edit operations
+    unedited: "{old}" # < old - original value
+    edited: "{old} {emoji.symbol.change} {new}" # < old, new - original and new values
 
-  canceled: |
+  canceled: | # < old - original of the canceled message
       {old}
       {emoji.nav.cancel} CANCELED {emoji.nav.cancel}
 
-button: # -(app.dialogs.markups / rows)
+button:
   question: 
     question_text: "Question Text"
     answer_text: "Answer Text"
@@ -214,8 +218,8 @@ button: # -(app.dialogs.markups / rows)
   user:
     username: "Username"
     role: "Role"
-    found: "Found ({identity})" # < identity (username/id)
-    you: "You ({identity})" # < identity (username/id)
+    found: "Found ({identity})" # < identity
+    you: "You ({identity})" # < identity
 
   settings:
     user: "{emoji.menu.user} Users"

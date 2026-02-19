@@ -15,16 +15,16 @@ class SendAction(str, Enum):
     REPLY = "reply"
 
 
-async def send_via_action(message: Message, action: SendAction, **kwargs) -> Message:
+async def send_via_action(message: Message, action: SendAction, *args, **kwargs) -> Message:
     match action:
         case SendAction.EDIT:
             return await message.edit_text(
-                **kwargs
+                *args, **kwargs
             )  # pyright: ignore[reportReturnType]
         case SendAction.REPLY:
-            return await message.reply(**kwargs)
+            return await message.reply(*args, **kwargs)
         case _:
-            return await message.answer(**kwargs)
+            return await message.answer(*args, **kwargs)
 
 
 def with_message_action(
@@ -33,9 +33,9 @@ def with_message_action(
 
     @wraps(func)
     async def inner(message: Message, action: SendAction, *args, **kwargs):
-        async def send(**data):
-            return await send_via_action(message, action, **data)
-
+        async def send(*send_args, **send_kwargs):
+            print(send_kwargs)
+            return await send_via_action(message, action, *send_args, **send_kwargs)
         return await func(
             send,
             *args,
