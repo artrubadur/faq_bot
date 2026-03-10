@@ -5,12 +5,16 @@ from pathlib import Path
 from loguru import logger
 
 from app.bot.instance import bot, dp
-from app.bot.middlewares import LastMessageMiddleware, LogHandlerMiddleware
+from app.bot.middlewares import (
+    AdminAccessMiddleware,
+    LastMessageMiddleware,
+    LogHandlerMiddleware,
+)
 from app.core import commands_status, constants_status, messages_status
 from app.core.config import config
 from app.core.logging.setup import setup_logging
-from app.handlers import router
-from app.storage.core import close_db, init_db
+from app.handlers import admin_router, common_router, public_router
+from app.storage.core import close_db, init_db, sync_admin_roles
 
 CONFIG_DIR = Path.cwd() / "config"
 
@@ -24,6 +28,7 @@ async def ignore_signals():
 async def startup():
     setup_logging(CONFIG_DIR / f"logging.{config.env}.yml")
     await init_db()
+    await sync_admin_roles()
 
     logger.info(messages_status)
     logger.info(constants_status)
@@ -37,7 +42,14 @@ async def startup():
     dp.message.middleware(log_handler_mw)
     dp.callback_query.middleware(log_handler_mw)
 
-    dp.include_router(router)
+    admin_access_mw = AdminAccessMiddleware()
+    admin_router.message.middleware(admin_access_mw)
+    admin_router.callback_query.middleware(admin_access_mw)
+
+    dp.include_router(admin_router)
+    dp.include_router(common_router)
+    dp.include_router(public_router)
+
     logger.info("Bot is starting")
     await dp.start_polling(bot)
 

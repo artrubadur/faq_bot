@@ -29,7 +29,8 @@ class Config(BaseSettings):
 
         return data
 
-    tg_bot_token: str
+    tg_token: str
+    tg_admins: list[int]
 
     db_name: str
     db_user: str

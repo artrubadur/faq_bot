@@ -1,9 +1,11 @@
 from loguru import logger
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 import app.storage.models  # noqa: F401
 from app.core.config import config
 from app.storage.base import Base
+from app.storage.models.user import Role, User
 
 database_url = f"postgresql+asyncpg://{config.db_user}:{config.db_pass}@{config.db_host}:5432/{config.db_name}"
 engine = create_async_engine(database_url)
@@ -16,6 +18,42 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
         logger.debug("Tables created")
     logger.info("The database is initialized")
+
+
+async def sync_admin_roles():
+    admin_ids = set(config.tg_admins)
+
+    logger.debug(
+        "Synchronizing admin access",
+        admin_count=len(admin_ids),
+        admin_ids=sorted(admin_ids),
+    )
+
+    async with async_session() as session:
+        promoted = await session.execute(
+            update(User)
+            .where(User.telegram_id.in_(admin_ids))
+            .values(role=Role.ADMIN)
+            .returning(User.telegram_id)
+        )
+        promoted_admins = promoted.scalars().all()
+
+        demoted = await session.execute(
+            update(User)
+            .where(User.role == Role.ADMIN)
+            .where(~User.telegram_id.in_(admin_ids))
+            .values(role=Role.USER)
+            .returning(User.telegram_id)
+        )
+        demoted_admins = demoted.scalars().all()
+
+        await session.commit()
+
+    logger.info(
+        "Admin access synchronized",
+        promoted=promoted_admins,
+        demoted=demoted_admins,
+    )
 
 
 async def close_db():
