@@ -69,7 +69,7 @@ async def user_update_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data({"in_operation": True})
+    await state.set_data({"in_operation": True})
     await state.set_state(UserUpdate.waiting_for_identity)
 
 
@@ -88,8 +88,7 @@ async def process_identity_handler(
             user = await service.get_user(input_id)
     except NoResultFound:
         await state.clear()
-        await send_not_found(message, send_action, input_id, input_username)
-        return
+        return await send_not_found(message, send_action, input_id, input_username)
 
     await state.update_data(
         orig_id=user.telegram_id,
@@ -151,12 +150,12 @@ async def process_fields_handler(
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             message,
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
+    await state.set_data(data)
 
     id: int = data["orig_id"]
     username: str | None = data["orig_username"]
@@ -338,12 +337,11 @@ async def user_update_cb_save_handler(
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             callback.message,  # pyright: ignore[reportArgumentType]
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
 
     id: int = data["orig_id"]
     username: str | None = data["orig_username"]

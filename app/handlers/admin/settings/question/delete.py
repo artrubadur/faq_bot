@@ -127,12 +127,11 @@ async def question_delete_cb_confirm_handler(
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             callback.message,  # pyright: ignore[reportArgumentType]
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
     input_id: int = data["input_id"]
 
     try:

@@ -97,12 +97,12 @@ async def question_create_msg_answer_text_handler(
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             message,
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
+    await state.set_data(data)
 
     input_question_text: str = data["input_question_text"]
 
@@ -123,12 +123,12 @@ async def question_create_cb_create_confirm_handler(
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             callback.message,  # pyright: ignore[reportArgumentType]
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
+    await state.set_data(data)
 
     input_question_text: str = data["input_question_text"]
     input_answer_text: str = data["input_answer_text"]
@@ -169,12 +169,11 @@ async def question_create_cb_similar_confirm_handler(
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             callback.message,  # pyright: ignore[reportArgumentType]
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
 
     async with async_session() as session:
         repo = QuestionsRepository(session)

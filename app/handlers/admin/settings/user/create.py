@@ -61,7 +61,7 @@ async def user_create_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data({"in_operation": True})
+    await state.set_data({"in_operation": True})
     await state.set_state(UserCreation.waiting_for_identity)
 
 
@@ -206,17 +206,16 @@ async def process_role_handler(
     *,
     send_action: SendAction,
 ):
-    await state.update_data(input_role=input_role)
-
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             message,
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
+
+    await state.update_data(input_role=input_role, in_operation=True)
 
     input_id: int = data["input_id"]
     input_username: str | None = data["input_username"]
@@ -278,12 +277,11 @@ async def user_create_cb_confirm_handler(callback: CallbackQuery, state: TempCon
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             callback.message,  # pyright: ignore[reportArgumentType]
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
 
     input_id: int = data["input_id"]
     input_username: str | None = data["input_username"]
@@ -296,13 +294,12 @@ async def user_create_cb_confirm_handler(callback: CallbackQuery, state: TempCon
             user = await service.create_user(input_id, input_username, input_role)
     except IntegrityError:
         await state.clear()
-        await send_already_exists(
+        return await send_already_exists(
             callback.message,  # pyright: ignore[reportArgumentType]
             SendAction.EDIT,
             input_id,
             input_username,
         )
-        return
 
     await state.clear()
 

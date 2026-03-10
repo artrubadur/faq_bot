@@ -45,6 +45,7 @@ async def process(
             PARENT_DIR,
         )
         return
+    await state.set_data(data)
 
     order: str = data["order"]
     ascending: bool = data["ascending"]
@@ -64,8 +65,7 @@ async def process(
     page = min(max_page, page)
     if page == 0:
         logger.debug("No users found")
-        await send_empty_pagination(message, send_action)
-        return
+        return await send_empty_pagination(message, send_action)
     async with async_session() as session:
         repo = UsersRepository(session)
         service = UsersService(repo)

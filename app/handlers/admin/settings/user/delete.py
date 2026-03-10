@@ -53,7 +53,7 @@ async def user_delete_cb_handler(
     )
     await last_message.set(sent_message, state)
 
-    await state.update_data({"in_operation": True})
+    await state.set_data({"in_operation": True})
     await state.set_state(UserDeletion.waiting_for_identity)
 
 
@@ -133,12 +133,11 @@ async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: TempCon
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             callback.message,  # pyright: ignore[reportArgumentType]
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
 
     input_id: int = data["input_id"]
 

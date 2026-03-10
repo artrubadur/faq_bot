@@ -21,8 +21,8 @@ def format_response(text: str, message: Message, **kwargs):
 
 def format_exception(exception: str | None = None, **kwargs):
     return messages.format.field.exception.format(
-        exception=exception or messages.format.fallback.exception, **kwargs
-    )
+        exception=exception or messages.format.fallback.exception
+    ).format(**kwargs)
 
 
 def format_id(id: int):

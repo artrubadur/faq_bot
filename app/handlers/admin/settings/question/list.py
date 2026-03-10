@@ -39,12 +39,12 @@ async def process(
     data = await state.get_data()
     if is_expired(data):
         await state.clear()
-        await send_expired(
+        return await send_expired(
             message,
             SendAction.ANSWER,
             PARENT_DIR,
         )
-        return
+    await state.set_data(data)
 
     order: str = data["order"]
     ascending: bool = data["ascending"]
