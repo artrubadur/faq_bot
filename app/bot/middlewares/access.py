@@ -1,0 +1,51 @@
+from aiogram import BaseMiddleware
+from loguru import logger
+from sqlalchemy.exc import NoResultFound
+
+from app.repositories import UsersRepository
+from app.services import UsersService
+from app.storage.core import async_session
+from app.storage.models.user import Role
+from app.storage.temp import TempContext
+
+
+class AccessMiddleware(BaseMiddleware):
+    async def _resolve_role(self, data: dict, sender_id: int) -> str:
+        state: TempContext = data["state"]
+
+        if cached_role := await self._resolve_cached_role(state):
+            return cached_role
+
+        return await self._resolve_stored_role(sender_id)
+
+    async def _resolve_cached_role(self, state: TempContext) -> str:
+        stored_role = await state.storage.get_value(
+            state.key, "sender_role", None, "long"
+        )
+        await state.storage.update_data(state.key, {"sender_role": stored_role}, "long")
+        return stored_role
+
+    async def _resolve_stored_role(self, sender_id: int) -> str:
+        try:
+            async with async_session() as session:
+                repo = UsersRepository(session)
+                service = UsersService(repo)
+                user = await service.get_user(sender_id)
+                return user.role
+        except NoResultFound:
+            return Role.USER
+
+
+class AdminMiddleware(AccessMiddleware):
+    async def __call__(self, handler, event, data):
+        sender_id = event.from_user.id
+        sender_role = self._resolve_role(data, sender_id)
+
+        if sender_role != Role.ADMIN:
+            logger.debug(
+                "Handler skipped: sender is not admin",
+                tg_id=sender_id,
+            )
+            return
+
+        return await handler(event, data)

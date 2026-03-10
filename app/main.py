@@ -6,7 +6,7 @@ from loguru import logger
 
 from app.bot.instance import bot, dp
 from app.bot.middlewares import (
-    AdminAccessMiddleware,
+    AdminMiddleware,
     LastMessageMiddleware,
     LogHandlerMiddleware,
 )
@@ -42,7 +42,7 @@ async def startup():
     dp.message.middleware(log_handler_mw)
     dp.callback_query.middleware(log_handler_mw)
 
-    admin_access_mw = AdminAccessMiddleware()
+    admin_access_mw = AdminMiddleware()
     admin_router.message.middleware(admin_access_mw)
     admin_router.callback_query.middleware(admin_access_mw)
 
