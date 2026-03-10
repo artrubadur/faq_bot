@@ -1,14 +1,23 @@
 from typing import Any
 
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.base import StorageKey
 
-from app.bot.storage import StorageScope
-from app.utils.state.storage import get_key, get_storage
+from app.storage.temp import StorageScope, TempStorage
+
+
+def get_storage(dispatcher: Dispatcher) -> TempStorage:
+    return dispatcher.fsm.storage  # pyright: ignore[reportReturnType]
+
+
+def get_key(bot: Bot, target_id: int):
+    return StorageKey(bot_id=bot.id, chat_id=target_id, user_id=target_id)
 
 
 async def set_data(
     bot: Bot,
     dispatcher: Dispatcher,
+    
     target_id: int,
     data: dict[str, Any],
     scope: StorageScope,

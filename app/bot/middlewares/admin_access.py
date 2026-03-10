@@ -3,7 +3,7 @@ from aiogram.dispatcher.event.bases import SkipHandler
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.repositories import UsersRepository
 from app.services import UsersService
 from app.storage.core import async_session
@@ -12,7 +12,7 @@ from app.storage.models.user import Role
 
 class AdminAccessMiddleware(BaseMiddleware):
     async def __call__(self, handler, event, data):
-        state: LSTContext | None = data.get("state")
+        state: TempContext | None = data.get("state")
         from_user = getattr(event, "from_user", None)
 
         if state is None or from_user is None:
@@ -32,7 +32,7 @@ class AdminAccessMiddleware(BaseMiddleware):
 
         return await handler(event, data)
 
-    async def _resolve_sender_role(self, sender_id: int, state: LSTContext) -> str:
+    async def _resolve_sender_role(self, sender_id: int, state: TempContext) -> str:
         cached_role: str | None = await state.storage.get_value(
             state.key, "sender_role", None, "long"
         )

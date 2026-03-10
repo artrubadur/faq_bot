@@ -1,10 +1,11 @@
+
 from aiogram import F, Router
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import QUESTIONS_UPDATE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import (
@@ -53,7 +54,7 @@ class QuestionUpdate(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def question_update_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -76,7 +77,7 @@ async def question_update_cb_handler(
 
 
 async def process_id_handler(
-    message: Message, state: LSTContext, input_id: int, *, send_action: SendAction
+    message: Message, state: TempContext, input_id: int, *, send_action: SendAction
 ):
     try:
         async with async_session() as session:
@@ -107,7 +108,7 @@ async def process_id_handler(
 
 @router.message(QuestionUpdate.waiting_for_id)
 async def question_update_msg_id_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -125,7 +126,7 @@ async def question_update_msg_id_handler(
 
 @router.callback_query(IdCallback.filter(F.dir == DIR))
 async def question_update_cb_id_handler(
-    callback: CallbackQuery, callback_data: IdCallback, state: LSTContext
+    callback: CallbackQuery, callback_data: IdCallback, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -141,7 +142,7 @@ async def question_update_cb_id_handler(
 
 
 async def process_fields_handler(
-    message: Message, state: LSTContext, *, send_action: SendAction
+    message: Message, state: TempContext, *, send_action: SendAction
 ):
     data = await state.get_data()
     if is_expired(data):
@@ -180,7 +181,7 @@ async def process_fields_handler(
 
 @router.callback_query(ConfirmCallback.filter((F.dir == DIR) & (F.step == "update")))
 async def question_update_confirm_cb_fields_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -192,7 +193,7 @@ async def question_update_confirm_cb_fields_handler(
 
 @router.callback_query(CancelCallback.filter(F.dir == PARENT_DIR))
 async def question_update_cancel_cb_fields_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -204,7 +205,7 @@ async def question_update_cancel_cb_fields_handler(
 
 @router.callback_query(BackCallback.filter(F.dir == DIR))
 async def question_update_back_cb_fields_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -218,7 +219,7 @@ async def question_update_back_cb_fields_handler(
     EditCallback.filter((F.dir == DIR) & (F.field == "question_text"))
 )
 async def question_update_cb_edit_question_text_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -233,7 +234,7 @@ async def question_update_cb_edit_question_text_handler(
 
 @router.message(QuestionUpdate.waiting_for_question_text)
 async def question_update_msg_edited_question_text_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -253,7 +254,7 @@ async def question_update_msg_edited_question_text_handler(
 
 @router.callback_query(ConfirmCallback.filter((F.dir == DIR) & (F.step == "recompute")))
 async def question_update_cb_confirm_recompute_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -269,7 +270,7 @@ async def question_update_cb_confirm_recompute_handler(
 
 @router.callback_query(CancelCallback.filter(F.dir == DIR))
 async def question_update_cb_cancel_recompute_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -285,7 +286,7 @@ async def question_update_cb_cancel_recompute_handler(
 
 @router.callback_query(EditCallback.filter((F.dir == DIR) & (F.field == "answer_text")))
 async def question_update_cb_edit_answer_text_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -300,7 +301,7 @@ async def question_update_cb_edit_answer_text_handler(
 
 @router.message(QuestionUpdate.waiting_for_answer_text)
 async def question_update_msg_edited_answer_text_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -320,7 +321,7 @@ async def question_update_msg_edited_answer_text_handler(
 
 @router.callback_query(EditCallback.filter((F.dir == DIR) & (F.field == "rating")))
 async def question_update_cb_edit_rating_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -335,7 +336,7 @@ async def question_update_cb_edit_rating_handler(
 
 @router.message(QuestionUpdate.waiting_for_rating)
 async def question_update_msg_edited_rating_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -354,7 +355,7 @@ async def question_update_msg_edited_rating_handler(
 
 
 @router.callback_query(SaveCallback.filter(F.dir == DIR))
-async def question_update_cb_save_handler(callback: CallbackQuery, state: LSTContext):
+async def question_update_cb_save_handler(callback: CallbackQuery, state: TempContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 

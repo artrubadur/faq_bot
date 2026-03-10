@@ -1,7 +1,8 @@
+
 from aiogram import F, Router
 from aiogram.types import CallbackQuery
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import USERS
 from app.core.messages import messages
 from app.dialogs import SendAction
@@ -22,7 +23,7 @@ async def user_cb_handler(callback: CallbackQuery):
 
 
 @router.callback_query(BackCallback.filter(F.dir == DIR))
-async def user_back_cb_handler(callback: CallbackQuery, state: LSTContext):
+async def user_back_cb_handler(callback: CallbackQuery, state: TempContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
@@ -34,7 +35,7 @@ async def user_back_cb_handler(callback: CallbackQuery, state: LSTContext):
 
 
 @router.callback_query(CancelCallback.filter(F.dir == DIR))
-async def user_cancel_cb_handler(callback: CallbackQuery, state: LSTContext):
+async def user_cancel_cb_handler(callback: CallbackQuery, state: TempContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
     await callback.message.edit_text(

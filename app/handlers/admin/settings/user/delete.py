@@ -1,10 +1,11 @@
+
 from aiogram import F, Router
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import USERS_DELETE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import ConfirmCallback
@@ -34,7 +35,7 @@ class UserDeletion(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_delete_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -59,7 +60,7 @@ async def user_delete_cb_handler(
 
 async def process_identity_handler(
     message: Message,
-    state: LSTContext,
+    state: TempContext,
     input_id: int,
     input_username: str | None,
     *,
@@ -88,7 +89,7 @@ async def process_identity_handler(
 
 @router.message(UserDeletion.waiting_for_identity)
 async def user_delete_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -108,7 +109,7 @@ async def user_delete_msg_identity_handler(
 
 @router.callback_query(IdentityCallback.filter(F.dir == DIR))
 async def user_delete_cb_identity_handler(
-    callback: CallbackQuery, callback_data: IdentityCallback, state: LSTContext
+    callback: CallbackQuery, callback_data: IdentityCallback, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -126,7 +127,7 @@ async def user_delete_cb_identity_handler(
 
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
-async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: LSTContext):
+async def user_delete_cb_confirm_handler(callback: CallbackQuery, state: TempContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 

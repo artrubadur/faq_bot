@@ -1,10 +1,11 @@
+
 from aiogram import F, Router
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import IntegrityError, NoResultFound
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import USERS_UPDATE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import (
@@ -50,7 +51,7 @@ class UserUpdate(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_update_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -75,7 +76,7 @@ async def user_update_cb_handler(
 
 async def process_identity_handler(
     message: Message,
-    state: LSTContext,
+    state: TempContext,
     input_id: int,
     input_username: str | None,
     *,
@@ -108,7 +109,7 @@ async def process_identity_handler(
 
 @router.message(UserUpdate.waiting_for_identity)
 async def user_update_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -128,7 +129,7 @@ async def user_update_msg_identity_handler(
 
 @router.callback_query(IdentityCallback.filter(F.dir == DIR))
 async def user_update_cb_identity_handler(
-    callback: CallbackQuery, callback_data: IdentityCallback, state: LSTContext
+    callback: CallbackQuery, callback_data: IdentityCallback, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -146,7 +147,7 @@ async def user_update_cb_identity_handler(
 
 
 async def process_fields_handler(
-    message: Message, state: LSTContext, *, send_action: SendAction
+    message: Message, state: TempContext, *, send_action: SendAction
 ):
     data = await state.get_data()
     if is_expired(data):
@@ -180,7 +181,7 @@ async def process_fields_handler(
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
 async def user_update_confirm_cb_fields_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -192,7 +193,7 @@ async def user_update_confirm_cb_fields_handler(
 
 @router.callback_query(CancelCallback.filter(F.dir == DIR))
 async def user_update_cancel_cb_fields_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -204,7 +205,7 @@ async def user_update_cancel_cb_fields_handler(
 
 @router.callback_query(BackCallback.filter(F.dir == DIR))
 async def user_update_back_cb_fields_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await process_fields_handler(
@@ -216,7 +217,7 @@ async def user_update_back_cb_fields_handler(
 
 @router.callback_query(EditCallback.filter((F.dir == DIR) & (F.field == "username")))
 async def user_update_cb_edit_username_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -239,7 +240,7 @@ async def user_update_cb_edit_username_handler(
 
 @router.message(UserUpdate.waiting_for_username)
 async def user_update_msg_edited_username_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -257,7 +258,7 @@ async def user_update_msg_edited_username_handler(
 
 @router.callback_query(UsernameCallback.filter(F.dir == DIR))
 async def user_update_cb_edited_username_handler(
-    callback: CallbackQuery, callback_data: UsernameCallback, state: LSTContext
+    callback: CallbackQuery, callback_data: UsernameCallback, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -274,7 +275,7 @@ async def user_update_cb_edited_username_handler(
 
 @router.callback_query(EditCallback.filter((F.dir == DIR) & (F.field == "role")))
 async def user_update_msg_edit_role_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -292,7 +293,7 @@ async def user_update_msg_edit_role_handler(
 
 @router.message(UserUpdate.waiting_for_role)
 async def user_update_msg_edited_role_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -310,7 +311,7 @@ async def user_update_msg_edited_role_handler(
 
 @router.callback_query(RoleCallback.filter(F.dir == DIR))
 async def user_update_cb_edited_role_handler(
-    callback: CallbackQuery, callback_data: RoleCallback, state: LSTContext
+    callback: CallbackQuery, callback_data: RoleCallback, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -326,7 +327,7 @@ async def user_update_cb_edited_role_handler(
 
 
 @router.callback_query(SaveCallback.filter(F.dir == DIR))
-async def user_update_cb_save_handler(callback: CallbackQuery, state: LSTContext):
+async def user_update_cb_save_handler(callback: CallbackQuery, state: TempContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 

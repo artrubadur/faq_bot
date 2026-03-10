@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import QUESTIONS_DELETE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import ConfirmCallback
@@ -34,13 +34,14 @@ class QuestionDeletion(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def question_get_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
     found_question_id: int | None = await state.storage.get_value(
-        state.key, "found_question_id", None, "long"
+        state.key, "found_question_id", None, 
+        
     )
 
     sent_message = await send_enter_id(
@@ -57,7 +58,7 @@ async def question_get_cb_handler(
 
 
 async def process_id_handler(
-    message: Message, state: LSTContext, input_id: int, *, send_action: SendAction
+    message: Message, state: TempContext, input_id: int, *, send_action: SendAction
 ):
     try:
         async with async_session() as session:
@@ -82,7 +83,7 @@ async def process_id_handler(
 
 @router.message(QuestionDeletion.waiting_for_id)
 async def question_delete_msg_id_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -100,7 +101,7 @@ async def question_delete_msg_id_handler(
 
 @router.callback_query(IdCallback.filter(F.dir == DIR))
 async def question_delete_cb_identity_handler(
-    callback: CallbackQuery, callback_data: IdCallback, state: LSTContext
+    callback: CallbackQuery, callback_data: IdCallback, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -117,7 +118,7 @@ async def question_delete_cb_identity_handler(
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
 async def question_delete_cb_confirm_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)

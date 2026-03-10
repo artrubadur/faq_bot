@@ -1,9 +1,10 @@
+
 from aiogram import F, Router
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import QUESTIONS_LIST
 from app.dialogs.actions import SendAction
 from app.dialogs.rows.common import (
@@ -32,7 +33,7 @@ class QuestionListing(StatesGroup):
 async def process(
     message: Message,
     last_message: LastMessage,
-    state: LSTContext,
+    state: TempContext,
     *,
     send_action: SendAction
 ):
@@ -90,7 +91,7 @@ async def process(
 
 @router.callback_query(F.data == DIR)
 async def question_list_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -110,7 +111,7 @@ async def question_list_cb_handler(
 
 @router.message(QuestionListing.waiting_for_page)
 async def question_list_msg_page_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.delete(message, state)
 
@@ -133,7 +134,7 @@ async def question_list_cb_page_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: PaginPageCallback,
-    state: LSTContext,
+    state: TempContext,
 ):
     await callback.answer()
 
@@ -154,7 +155,7 @@ async def question_list_cb_size_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: PaginSizeCallback,
-    state: LSTContext,
+    state: TempContext,
 ):
     await callback.answer()
 
@@ -173,7 +174,7 @@ async def question_list_cb_order_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: PaginOrderCallback,
-    state: LSTContext,
+    state: TempContext,
 ):
     await callback.answer()
 

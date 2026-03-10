@@ -3,7 +3,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
 from loguru import logger
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import QUESTIONS_CREATE
 from app.core.exceptions import SimilarityError
 from app.dialogs.actions import SendAction
@@ -38,7 +38,7 @@ class QuestionCreation(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def question_create_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -56,7 +56,7 @@ async def question_create_cb_handler(
 
 @router.message(QuestionCreation.waiting_for_question_text)
 async def question_create_msg_question_text_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -79,7 +79,7 @@ async def question_create_msg_question_text_handler(
 
 @router.message(QuestionCreation.waiting_for_answer_text)
 async def question_create_msg_answer_text_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -115,7 +115,7 @@ async def question_create_msg_answer_text_handler(
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR and F.step == "create"))
 async def question_create_cb_create_confirm_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -161,7 +161,7 @@ async def question_create_cb_create_confirm_handler(
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR and F.step == "similar"))
 async def question_create_cb_similar_confirm_handler(
-    callback: CallbackQuery, state: LSTContext
+    callback: CallbackQuery, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)

@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import USERS_CREATE
 from app.dialogs import SendAction
 from app.dialogs.rows.common import ConfirmCallback
@@ -42,7 +42,7 @@ class UserCreation(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_create_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -68,7 +68,7 @@ async def user_create_cb_handler(
 async def process_identity_handler(
     message: Message,
     last_message: LastMessage,
-    state: LSTContext,
+    state: TempContext,
     input_id: int,
     input_username: str | None,
     *,
@@ -95,7 +95,7 @@ async def process_identity_handler(
 
 @router.message(UserCreation.waiting_for_identity)
 async def user_create_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -123,7 +123,7 @@ async def user_create_cb_identity_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: IdentityCallback,
-    state: LSTContext,
+    state: TempContext,
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -144,7 +144,7 @@ async def user_create_cb_identity_handler(
 async def process_username_handler(
     message: Message,
     last_message: LastMessage,
-    state: LSTContext,
+    state: TempContext,
     input_username: str | None,
     *,
     send_action: SendAction,
@@ -159,7 +159,7 @@ async def process_username_handler(
 
 @router.message(UserCreation.waiting_for_username)
 async def user_create_msg_username_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -182,7 +182,7 @@ async def user_create_cb_username_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: UsernameCallback,
-    state: LSTContext,
+    state: TempContext,
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -201,7 +201,7 @@ async def user_create_cb_username_handler(
 async def process_role_handler(
     message: Message,
     last_message: LastMessage,
-    state: LSTContext,
+    state: TempContext,
     input_role: str,
     *,
     send_action: SendAction,
@@ -231,7 +231,7 @@ async def process_role_handler(
 
 @router.message(UserCreation.waiting_for_role)
 async def user_create_msg_role_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -254,7 +254,7 @@ async def user_create_cb_role_handler(
     callback: CallbackQuery,
     last_message: LastMessage,
     callback_data: RoleCallback,
-    state: LSTContext,
+    state: TempContext,
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
@@ -271,7 +271,7 @@ async def user_create_cb_role_handler(
 
 
 @router.callback_query(ConfirmCallback.filter(F.dir == DIR))
-async def user_create_cb_confirm_handler(callback: CallbackQuery, state: LSTContext):
+async def user_create_cb_confirm_handler(callback: CallbackQuery, state: TempContext):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 

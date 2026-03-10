@@ -13,7 +13,7 @@ from redis.asyncio import Redis
 StorageScope = Literal["long", "short"]
 
 
-class LSTStorage(BaseStorage):
+class TempStorage(BaseStorage):
     def __init__(self, redis: Redis, long_ttl: int, short_ttl: int) -> None:
         self.storage_scopes: dict[StorageScope, RedisStorage] = {
             "long": RedisStorage(
@@ -77,10 +77,10 @@ class LSTStorage(BaseStorage):
         await self.set_state(key, None, scope)
 
 
-class LSTContext(FSMContext):
-    storage: LSTStorage
+class TempContext(FSMContext):
+    storage: TempStorage
 
-    def __init__(self, storage: LSTStorage, key: StorageKey) -> None:
+    def __init__(self, storage: TempStorage, key: StorageKey) -> None:
         super().__init__(storage, key)
 
     async def clear(self):

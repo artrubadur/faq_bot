@@ -4,7 +4,7 @@ from aiogram.types import CallbackQuery, Message
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
-from app.bot.storage import LSTContext
+from app.storage.temp import TempContext
 from app.core.constants.dirs import USERS_GET
 from app.dialogs import SendAction
 from app.dialogs.rows.user import IdentityCallback
@@ -31,14 +31,15 @@ class UserFinding(StatesGroup):
 
 @router.callback_query(F.data == DIR)
 async def user_get_cb_handler(
-    callback: CallbackQuery, last_message: LastMessage, state: LSTContext
+    callback: CallbackQuery, last_message: LastMessage, state: TempContext
 ):
     await callback.answer()
     await callback.message.edit_reply_markup(reply_markup=None)
 
     sender_id = callback.from_user.id
     sender_username = callback.from_user.username
-    data = await state.storage.get_data(state.key, "long")
+    data = await state.storage.get_data(state.key, 
+                                        )
     found_user_id: int | None = data.get("found_user_id", None)
     found_username: str | None = data.get("found_username", None)
 
@@ -59,7 +60,7 @@ async def user_get_cb_handler(
 
 async def process_identity_handler(
     message: Message,
-    state: LSTContext,
+    state: TempContext,
     input_id: int,
     input_username: str | None,
     *,
@@ -101,7 +102,7 @@ async def process_identity_handler(
 
 @router.message(UserFinding.waiting_for_identity)
 async def user_get_msg_identity_handler(
-    message: Message, last_message: LastMessage, state: LSTContext
+    message: Message, last_message: LastMessage, state: TempContext
 ):
     await last_message.edit_reply_markup(message, state)
 
@@ -121,7 +122,7 @@ async def user_get_msg_identity_handler(
 
 @router.callback_query(IdentityCallback.filter(F.dir == DIR))
 async def user_get_cb_identity_handler(
-    callback: CallbackQuery, callback_data: IdentityCallback, state: LSTContext
+    callback: CallbackQuery, callback_data: IdentityCallback, state: TempContext
 ):
     await callback.answer("")
     await callback.message.edit_reply_markup(reply_markup=None)
