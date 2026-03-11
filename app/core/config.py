@@ -1,36 +1,37 @@
+from pathlib import Path
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class RequestsConfig(BaseModel):
+    model_config = ConfigDict(extra="allow", frozen=True)
+
+
+class PathConfig(BaseModel):
+    assets: str | None = None
+    constants: Path = Path("./config/constants.yml")
+    messages: Path = Path("./config/messages.yml")
+    commands: Path = Path("./config/commands.yml")
+    requests: Path = Path("./config/requests.yml")
 
 
 class Config(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", frozen=True
+        env_file=".env",
+        env_file_encoding="utf-8",
+        frozen=True,
+        env_nested_delimiter="__",
     )
 
     env: Literal["dev", "prod"]
 
-    assets: str | None = None
-    constants: str | None = None
-    messages: str | None = None
-    commands: str | None = None
-
-    @model_validator(mode="before")
-    def set_defaults(cls, data):
-        assets = data.get("assets")
-        if assets:
-            for field in ["constants", "messages", "commands"]:
-                value = data.get(field)
-                if value is None:
-                    data[field] = assets
-                if value == "":
-                    data[field] = None
-
-        return data
+    paths: PathConfig = PathConfig()
+    requests: RequestsConfig = Field(default_factory=RequestsConfig)
 
     tg_token: str
-    tg_admins: list[int]
+    tg_admins: list[int] = []
 
     db_name: str
     db_user: str
@@ -42,10 +43,10 @@ class Config(BaseSettings):
     redis_long_ttl: int
     redis_short_ttl: int
 
-    yc_folder_id: str
-    yc_api_key: str
+    # yc_folder_id: str
+    # yc_api_key: str
 
-    qn_sim_threshold: float
+    qn_sim_threshold: float = 0.8
 
 
 config = Config()  # pyright: ignore[reportCallIssue]

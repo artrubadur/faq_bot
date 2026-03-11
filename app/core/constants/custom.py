@@ -1,15 +1,7 @@
-from pathlib import Path
-
 from pydantic_settings import SettingsConfigDict
 
 from app.core.config import config
 from app.utils.config import DynamicSettings
-
-CONSTANTS_PATH = (
-    Path.cwd()
-    / "config"
-    / (f"constants.{config.constants}.yml" if config.constants else "constants.yml")
-)
 
 BOT_SYSTEM_KEYS = [
     "identity",
@@ -36,16 +28,16 @@ BOT_SYSTEM_KEYS = [
 
 
 class CustomConstants(DynamicSettings):
-    model_config = SettingsConfigDict(yaml_file=CONSTANTS_PATH)
+    model_config = SettingsConfigDict(yaml_file=config.paths.constants)
 
 
 constants = CustomConstants(reserved=BOT_SYSTEM_KEYS)
 
 
 status = "Failed to check the status of constants"
-if not CONSTANTS_PATH.exists():
-    status = f"No constanst loaded: File {str(CONSTANTS_PATH)} does not exists."
+if not config.paths.constants.exists():
+    status = f"No constanst loaded: File {str(config.paths.constants)} does not exists."
 elif len(constants.model_fields_set) == 1:  # reserved
-    status = f"No constanst loaded: File {str(CONSTANTS_PATH)} is empty."
+    status = f"No constanst loaded: File {str(config.paths.constants)} is empty."
 else:
-    status = f"Constants has been loaded from {str(CONSTANTS_PATH)}"
+    status = f"Constants has been loaded from {str(config.paths.constants)}"

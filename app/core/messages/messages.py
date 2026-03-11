@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any, Literal
 
 from pydantic import BaseModel, field_validator, model_validator
@@ -9,12 +8,6 @@ from app.core.constants.custom import BOT_SYSTEM_KEYS, constants
 from app.core.exceptions import ConfigError
 from app.core.messages.formatter import SafeFormatter
 from app.utils.config import YamlSettings
-
-MESSAGES_PATH = (
-    Path.cwd()
-    / "config"
-    / (f"messages.{config.messages}.yml" if config.messages else "messages.yml")
-)
 
 
 # Responses
@@ -359,7 +352,7 @@ class Format(BaseModel):
 
 
 class Messages(YamlSettings):
-    model_config = SettingsConfigDict(yaml_file=MESSAGES_PATH, frozen=False)
+    model_config = SettingsConfigDict(yaml_file=config.paths.messages, frozen=False)
 
     parse_mode: Literal["html", "markdown", None] = "html"
 
@@ -407,9 +400,9 @@ messages: Messages = Messages()
 
 
 status = "Failed to check the status of messages"
-if not MESSAGES_PATH.exists():
-    status = f"No messages loaded: File {str(MESSAGES_PATH)} does not exists."
-elif len(constants.model_fields_set) == 0:
-    status = f"No messages loaded: File {str(MESSAGES_PATH)} is empty."
+if not config.paths.messages.exists():
+    status = f"No messages loaded: File {str(config.paths.messages)} does not exists."
+elif len(messages.model_fields_set) == 0:
+    status = f"No messages loaded: File {str(config.paths.messages)} is empty."
 else:
-    status = f"Messages has been loaded from {str(MESSAGES_PATH)}"
+    status = f"Messages has been loaded from {str(config.paths.messages)}"

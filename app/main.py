@@ -11,7 +11,7 @@ from app.bot.middlewares import (
     LastMessageMiddleware,
     LogHandlerMiddleware,
 )
-from app.core import commands_status, constants_status, messages_status
+from app.core import commands_status, constants_status, messages_status, requests_status
 from app.core.config import config
 from app.core.logging.setup import setup_logging
 from app.handlers import admin_router, common_router, public_router
@@ -34,6 +34,7 @@ async def startup():
     logger.info(messages_status)
     logger.info(constants_status)
     logger.info(commands_status)
+    logger.info(requests_status)
 
     banned_mw = BannedMiddleware()
     dp.message.middleware(banned_mw)

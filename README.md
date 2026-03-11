@@ -10,20 +10,26 @@ docker-compose up
 ```env
 ENV=
 
-ASSETS=
-CONSTANTS=
-MESSAGES=
-COMMANDS=
+PATHS__CONSTANTS="./config/constants.yml"
+PATHS__MESSAGES="./config/messages.yml"
+PATHS__COMMANDS="./config/commands.yml"
+PATHS__REQUESTS="./config/requests.yml"
 
-TG_BOT_TOKEN=
+TG_TOKEN=
+TG_ADMINS=[]
 
 DB_NAME=
 DB_USER=
 DB_PASS=
 DB_HOST=
 
-YC_FOLDER_ID = 
-YC_API_KEY = 
+REDIS_HOST=
+REDIS_PASS=
+REDIS_LONG_TTL=
+REDIS_SHORT_TTL=
 
-QN_SIM_THRESHOLD=
+REQUESTS__FOLDER_ID=
+REQUESTS__IAM_TOKEN=
+
+QN_SIM_THRESHOLD=0.8
 ```

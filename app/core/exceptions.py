@@ -20,7 +20,7 @@ class SimilarityError(AppError):
         self.similarity = similarity
 
 
-class YandexAPIError(AppError):
+class APIError(AppError):
     def __init__(self, message: str, should_notify: bool = True):
         super().__init__(message, should_notify)
 
