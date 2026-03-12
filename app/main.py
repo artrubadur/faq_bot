@@ -2,12 +2,13 @@ import asyncio
 
 from loguru import logger
 
-from app.bot.instance import bot, dp
+from app.bot.instance import bot, dp, redis_client
 from app.bot.middlewares import (
     AdminMiddleware,
     BannedMiddleware,
     LastMessageMiddleware,
     LogHandlerMiddleware,
+    RateLimitMiddleware,
 )
 from app.core import commands_status, constants_status, messages_status, requests_status
 from app.core.config import config
@@ -29,6 +30,16 @@ async def startup():
     banned_mw = BannedMiddleware()
     dp.message.middleware(banned_mw)
     dp.callback_query.middleware(banned_mw)
+
+    if config.rate_limit.enabled:
+        rate_limit_mw = RateLimitMiddleware(
+            redis=redis_client,
+            max_requests=config.rate_limit.max_requests,
+            window=config.rate_limit.window,
+            skip_admin=config.rate_limit.skip_admin,
+        )
+        dp.message.middleware(rate_limit_mw)
+        dp.callback_query.middleware(rate_limit_mw)
 
     last_message_mw = LastMessageMiddleware(bot)
     dp.message.middleware(last_message_mw)

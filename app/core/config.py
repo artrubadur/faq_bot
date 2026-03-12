@@ -36,7 +36,14 @@ class RedisConfig(BaseModel):
 
 
 class QuestionsConfig(BaseModel):
-    sim_threshold: float = 0.8
+    sim_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+
+
+class RateLimitConfig(BaseModel):
+    enabled: bool = True
+    max_requests: int = Field(default=5, ge=1)
+    window: int = Field(default=10, ge=1)
+    skip_admin: bool = True
 
 
 class Config(BaseSettings):
@@ -52,7 +59,8 @@ class Config(BaseSettings):
     bot: BotConfig
     db: DBConfig
     redis: RedisConfig
-    questions: QuestionsConfig
+    questions: QuestionsConfig = Field(default_factory=QuestionsConfig)
+    rate_limit: RateLimitConfig = Field(default_factory=RateLimitConfig)
 
 
 config = Config()  # pyright: ignore[reportCallIssue]

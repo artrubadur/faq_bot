@@ -288,7 +288,9 @@ async def send_pagination(
     text = messages.responses.admin.question.listing.successful.format(
         page=page, max_page=max_page, content=table
     )
-    return await send(text=text, reply_markup=reply_markup, parse_mode=messages.parse_mode)
+    return await send(
+        text=text, reply_markup=reply_markup, parse_mode=messages.parse_mode
+    )
 
 
 @with_message_action

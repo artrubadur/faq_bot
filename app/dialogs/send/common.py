@@ -29,6 +29,16 @@ async def send_banned(
 
 
 @with_message_action
+async def send_rate_limit(
+    send: Callable[..., Awaitable[Message]], message: Message
+) -> Message:
+    return await send(
+        text=format_response(messages.responses.public.rate_limited, message),
+        parse_mode=messages.parse_mode,
+    )
+
+
+@with_message_action
 async def send_invalid(
     send: Callable[..., Awaitable[Message]], cancel_dir: str, exception: str | None
 ) -> Message:

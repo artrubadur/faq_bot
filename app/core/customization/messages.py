@@ -22,6 +22,7 @@ class PublicRsp(BaseModel):
     banned: str = (
         "❌ You have been added to the blacklist and can no longer use this bot."
     )
+    rate_limited: str = "Too many requests. Please try again a bit later."
 
 
 class UserAdmEnterRsp(BaseModel):
