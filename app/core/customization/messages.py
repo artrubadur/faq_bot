@@ -103,8 +103,8 @@ class FindingQstAdmRsp(BaseModel):
 
 
 class ListingQstAdmRsp(BaseModel):
-    successful: str = "🗂 User list: {page}/{max_page}\n" "<pre>{content}</pre>"
-    not_found: str = "🗂 No users found in the system"
+    successful: str = "🗂 Question list: {page}/{max_page}\n" "<pre>{content}</pre>"
+    not_found: str = "🗂 No questions found in the system"
 
 
 class QuestionAdmRsp(BaseModel):
