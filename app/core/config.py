@@ -1,7 +1,9 @@
 from pathlib import Path
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.core.exceptions import ConfigError
 
 
 class RequestsConfig(BaseModel):
@@ -31,12 +33,28 @@ class DBConfig(BaseModel):
 class RedisConfig(BaseModel):
     host: str
     password: str
-    long_ttl: int
-    short_ttl: int
+    long_ttl: int = 86400
+    short_ttl: int = 300
 
 
 class QuestionsConfig(BaseModel):
-    sim_threshold: float = Field(default=0.8, ge=0.0, le=1.0)
+    similarest_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
+    similar_threshold: float = Field(default=0.4, ge=0.0, le=1.0)
+    max_similar_amount: int = Field(default=7, ge=0)
+    max_popular_amount: int = Field(default=7, ge=0)
+    max_amount: int = Field(default=7, ge=1)
+
+    @model_validator(mode="after")
+    def validate_amount_limits(self) -> "QuestionsConfig":
+        if self.max_similar_amount > self.max_amount:
+            raise ConfigError(
+                "'max_similar_amount' cannot be greater than 'max_amount'"
+            )
+        if self.max_popular_amount > self.max_amount:
+            raise ConfigError(
+                "'max_popular_amount' cannot be greater than 'max_amount'"
+            )
+        return self
 
 
 class RateLimitConfig(BaseModel):

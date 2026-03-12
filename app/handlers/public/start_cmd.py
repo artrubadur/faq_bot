@@ -22,7 +22,7 @@ async def cmd_handler(message: Message):
         questions_repo = QuestionsRepository(session)
         questions_service = QuestionsService(questions_repo)
         try:
-            questions = await questions_service.get_most_popular_questions(7)
+            questions = await questions_service._get_most_popular_questions(7)
         except Exception:
             logger.exception("Failed to fetch popular questions")
             questions = []

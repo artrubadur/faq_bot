@@ -11,15 +11,17 @@ from app.utils.format.output import format_response
 
 @with_message_action
 async def send_similar(
-    send: Callable[..., Awaitable[Message]], message: Message, questions: list[Question]
+    send: Callable[..., Awaitable[Message]],
+    message: Message,
+    suggestions: list[Question],
 ) -> Message:
     builder = ReplyKeyboardBuilder()
-    for question in questions[1:]:
+    for question in suggestions[1:]:
         builder.button(text=question.question_text)
     builder.adjust(1)
     reply_markup = builder.as_markup(resize_keyboard=True)
 
-    most_similar = questions[0]
+    most_similar = suggestions[0]
     return await send(
         text=most_similar.answer_text,
         reply_markup=reply_markup,
@@ -32,10 +34,10 @@ async def send_failed(
     send: Callable[..., Awaitable[Message]],
     message: Message,
     exception: str,
-    fallback_questions: list[Question] = [],
+    suggestions: list[Question] = [],
 ) -> Message:
     builder = ReplyKeyboardBuilder()
-    for question in fallback_questions[1:]:
+    for question in suggestions[1:]:
         builder.button(text=question.question_text)
     builder.adjust(1)
     reply_markup = builder.as_markup(resize_keyboard=True)

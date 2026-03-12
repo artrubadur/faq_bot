@@ -3,6 +3,7 @@ from aiogram.filters import Command, CommandObject
 from aiogram.types import Message
 from loguru import logger
 
+from app.core.config import config
 from app.core.customization import messages
 from app.dialogs import SendAction
 from app.dialogs.send.public.ask import send_failed, send_similar
@@ -27,26 +28,26 @@ async def process_ask_handler(
         repo = QuestionsRepository(session)
         service = QuestionsService(repo)
 
-        similar_questions, _ = await service.get_similar_questions(question_text, 8)
-        popular_questions = await service.get_most_popular_questions(
-            8 - len(similar_questions), similar_questions
+        suggestions, is_confident = await service.suggest_questions(
+            question_text,
+            config.questions.max_simillar_amount,
+            config.questions.max_popular_amount,
+            config.questions.max_amount,
         )
 
-    suggestion = similar_questions + popular_questions
-
-    if len(similar_questions) == 0:
+    if not is_confident:
         logger.debug("Failed to answer user", tg_id=message.from_user.id)
         await send_failed(
             message,
             SendAction.ANSWER,
             message,
             messages.exceptions.search.not_found,
-            popular_questions,
+            suggestions,
         )
         return
 
     logger.debug("Answered user", tg_id=message.from_user.id, text=question_text)
-    await send_similar(message, send_action, message, suggestion)
+    await send_similar(message, send_action, message, suggestions)
 
 
 @router.message(Command("ask"))
