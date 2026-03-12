@@ -1,6 +1,6 @@
 from typing import Any, Literal
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
 from app.core.config import config
@@ -9,8 +9,9 @@ from app.core.exceptions import ConfigError
 from app.core.messages.formatter import SafeFormatter
 from app.utils.config import YamlSettings
 
-
 # Responses
+
+
 class PublicRsp(BaseModel):
     start: str = (
         "Hello, {first_name}! I will help you find the answer — just send a question"
@@ -62,12 +63,12 @@ class ListingUsrAdmRsp(BaseModel):
 
 
 class UserAdmRsp(BaseModel):
-    enter: UserAdmEnterRsp = UserAdmEnterRsp()
-    creation: CreationUsrAdmRsp = CreationUsrAdmRsp()
-    finding: FindingUsrAdmRsp = FindingUsrAdmRsp()
-    update: UpdateUsrAdmRsp = UpdateUsrAdmRsp()
-    deletion: DeletionUsrAdmRsp = DeletionUsrAdmRsp()
-    listing: ListingUsrAdmRsp = ListingUsrAdmRsp()
+    enter: UserAdmEnterRsp = Field(default_factory=UserAdmEnterRsp)
+    creation: CreationUsrAdmRsp = Field(default_factory=CreationUsrAdmRsp)
+    finding: FindingUsrAdmRsp = Field(default_factory=FindingUsrAdmRsp)
+    update: UpdateUsrAdmRsp = Field(default_factory=UpdateUsrAdmRsp)
+    deletion: DeletionUsrAdmRsp = Field(default_factory=DeletionUsrAdmRsp)
+    listing: ListingUsrAdmRsp = Field(default_factory=ListingUsrAdmRsp)
 
 
 class EnterQstAdmRsp(BaseModel):
@@ -107,12 +108,12 @@ class ListingQstAdmRsp(BaseModel):
 
 
 class QuestionAdmRsp(BaseModel):
-    enter: EnterQstAdmRsp = EnterQstAdmRsp()
-    creation: CreationQstAdmRsp = CreationQstAdmRsp()
-    deletion: DeletionQstAdmRsp = DeletionQstAdmRsp()
-    update: UpdateQstAdmRsp = UpdateQstAdmRsp()
-    finding: FindingQstAdmRsp = FindingQstAdmRsp()
-    listing: ListingQstAdmRsp = ListingQstAdmRsp()
+    enter: EnterQstAdmRsp = Field(default_factory=EnterQstAdmRsp)
+    creation: CreationQstAdmRsp = Field(default_factory=CreationQstAdmRsp)
+    deletion: DeletionQstAdmRsp = Field(default_factory=DeletionQstAdmRsp)
+    update: UpdateQstAdmRsp = Field(default_factory=UpdateQstAdmRsp)
+    finding: FindingQstAdmRsp = Field(default_factory=FindingQstAdmRsp)
+    listing: ListingQstAdmRsp = Field(default_factory=ListingQstAdmRsp)
 
 
 class SettingsAdmRsp(BaseModel):
@@ -132,8 +133,8 @@ class StateMscAdmRsp(BaseModel):
 
 
 class MiscAdmRsp(BaseModel):
-    goto: GotoMscAdmRsp = GotoMscAdmRsp()
-    state: StateMscAdmRsp = StateMscAdmRsp()
+    goto: GotoMscAdmRsp = Field(default_factory=GotoMscAdmRsp)
+    state: StateMscAdmRsp = Field(default_factory=StateMscAdmRsp)
 
 
 class BanAdmRsp(BaseModel):
@@ -145,19 +146,21 @@ class AdminRsp(BaseModel):
     invalid: str = "⚠ {exception}. Retry or back"
     expired: str = "The time for the operation has expired. Start over"
     access_denied: str = "Access denied: {exception}"
-    user: UserAdmRsp = UserAdmRsp()
-    question: QuestionAdmRsp = QuestionAdmRsp()
-    settings: SettingsAdmRsp = SettingsAdmRsp()
-    misc: MiscAdmRsp = MiscAdmRsp()
-    ban: BanAdmRsp = BanAdmRsp()
+    user: UserAdmRsp = Field(default_factory=UserAdmRsp)
+    question: QuestionAdmRsp = Field(default_factory=QuestionAdmRsp)
+    settings: SettingsAdmRsp = Field(default_factory=SettingsAdmRsp)
+    misc: MiscAdmRsp = Field(default_factory=MiscAdmRsp)
+    ban: BanAdmRsp = Field(default_factory=BanAdmRsp)
 
 
 class Responses(BaseModel):
-    public: PublicRsp = PublicRsp()
-    admin: AdminRsp = AdminRsp()
+    public: PublicRsp = Field(default_factory=PublicRsp)
+    admin: AdminRsp = Field(default_factory=AdminRsp)
 
 
 # Exception
+
+
 class SearchExc(BaseModel):
     not_found: str = "It seems that we failed to understand the question"
 
@@ -181,13 +184,15 @@ class MiscExc(BaseModel):
 
 
 class Exceptions(BaseModel):
-    search: SearchExc = SearchExc()
-    user: UserExc = UserExc()
-    question: QuestionExc = QuestionExc()
-    misc: MiscExc = MiscExc()
+    search: SearchExc = Field(default_factory=SearchExc)
+    user: UserExc = Field(default_factory=UserExc)
+    question: QuestionExc = Field(default_factory=QuestionExc)
+    misc: MiscExc = Field(default_factory=MiscExc)
 
 
 # Process
+
+
 class CommonPrc(BaseModel):
     page_invalid: str = "Message type is invalid"
 
@@ -218,12 +223,14 @@ class QuestionPrc(BaseModel):
 
 
 class Process(BaseModel):
-    common: CommonPrc = CommonPrc()
-    user: UserPrc = UserPrc()
-    question: QuestionPrc = QuestionPrc()
+    common: CommonPrc = Field(default_factory=CommonPrc)
+    user: UserPrc = Field(default_factory=UserPrc)
+    question: QuestionPrc = Field(default_factory=QuestionPrc)
 
 
 # Validation
+
+
 class CommonVal(BaseModel):
     page_invalid: str = "Page is invalid"
     page_negative: str = "Page cannot be negative"
@@ -245,12 +252,14 @@ class QuestionVal(BaseModel):
 
 
 class Validation(BaseModel):
-    common: CommonVal = CommonVal()
-    user: UserVal = UserVal()
-    question: QuestionVal = QuestionVal()
+    common: CommonVal = Field(default_factory=CommonVal)
+    user: UserVal = Field(default_factory=UserVal)
+    question: QuestionVal = Field(default_factory=QuestionVal)
 
 
 # Settings
+
+
 class QuestionSet(BaseModel):
     question_text: str = "Question Text"
     answer_text: str = "Answer Text"
@@ -293,13 +302,15 @@ class CommonSet(BaseModel):
 
 
 class Button(BaseModel):
-    question: QuestionSet = QuestionSet()
-    user: UserSet = UserSet()
-    settings: SettingsSet = SettingsSet()
-    common: CommonSet = CommonSet()
+    question: QuestionSet = Field(default_factory=QuestionSet)
+    user: UserSet = Field(default_factory=UserSet)
+    settings: SettingsSet = Field(default_factory=SettingsSet)
+    common: CommonSet = Field(default_factory=CommonSet)
 
 
 # Format
+
+
 class FieldFmt(BaseModel):
     id: str = "<code>{id}</code>"
     exception: str = "❌ {exception}"
@@ -343,11 +354,11 @@ class EditFmt(BaseModel):
 
 
 class Format(BaseModel):
-    field: FieldFmt = FieldFmt()
-    fallback: FallbackFmt = FallbackFmt()
-    question: QuestionFmt = QuestionFmt()
-    user: UserFmt = UserFmt()
-    edit: EditFmt = EditFmt()
+    field: FieldFmt = Field(default_factory=FieldFmt)
+    fallback: FallbackFmt = Field(default_factory=FallbackFmt)
+    question: QuestionFmt = Field(default_factory=QuestionFmt)
+    user: UserFmt = Field(default_factory=UserFmt)
+    edit: EditFmt = Field(default_factory=EditFmt)
     canceled: str = "{old}\n✖️ CANCELED ✖️"
 
 
@@ -362,14 +373,14 @@ class Messages(YamlSettings):
             return v.lower()
         return v
 
-    responses: Responses = Responses()
+    responses: Responses = Field(default_factory=Responses)
 
-    exceptions: Exceptions = Exceptions()
-    process: Process = Process()
-    validation: Validation = Validation()
+    exceptions: Exceptions = Field(default_factory=Exceptions)
+    process: Process = Field(default_factory=Process)
+    validation: Validation = Field(default_factory=Validation)
 
-    button: Button = Button()
-    format: Format = Format()
+    button: Button = Field(default_factory=Button)
+    format: Format = Field(default_factory=Format)
 
     @model_validator(mode="before")
     def apply_constants(cls, data: dict[str, Any]) -> dict[str, Any]:

@@ -1,4 +1,4 @@
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import SettingsConfigDict
 
 from app.core.config import config
@@ -9,14 +9,14 @@ SYSTEM_COMMANDS = {"start", "ask", "goto", "state", "settings", "error"}
 
 
 class Commands(YamlSettings):
-    commands: dict[str, str] = {}
+    commands: dict[str, str] = Field(default_factory=dict)
 
     @field_validator("commands", mode="before")
     def validate_commands(cls, commands):
         inter = SYSTEM_COMMANDS & set(commands.keys())
         if "start" in inter:
             raise ConfigError(
-                "The start command must be specified in the 'messages.*.yml' file"
+                "The start command must be specified in the 'PATH__COMMANDS' file"
             )
         if len(inter) > 0:
             commands_str = ", ".join([f"'{command}'" for command in commands])

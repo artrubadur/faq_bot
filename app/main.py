@@ -1,6 +1,4 @@
 import asyncio
-import signal
-from pathlib import Path
 
 from loguru import logger
 
@@ -17,17 +15,9 @@ from app.core.logging.setup import setup_logging
 from app.handlers import admin_router, common_router, public_router
 from app.storage.core import close_db, init_db, sync_admin_roles
 
-CONFIG_DIR = Path.cwd() / "config"
-
-
-async def ignore_signals():
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        signal.signal(sig, signal.SIG_IGN)
-    await asyncio.Event().wait()
-
 
 async def startup():
-    setup_logging(CONFIG_DIR / f"logging.{config.env}.yml")
+    setup_logging(config.paths.logging)
     await init_db()
     await sync_admin_roles()
 

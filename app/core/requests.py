@@ -59,8 +59,8 @@ class RequestTemplate(BaseModel):
 class EmbeddingRequestTemplate(RequestTemplate):
     embedding_path: str
     text_path: str
-    _embedding_path_tokens: tuple[str, ...] = PrivateAttr(default=())
-    _text_path_tokens: tuple[str, ...] = PrivateAttr(default=())
+    _embedding_path_tokens: tuple[str, ...] = PrivateAttr(default_factory=tuple)
+    _text_path_tokens: tuple[str, ...] = PrivateAttr(default_factory=tuple)
 
     def model_post_init(self, __context) -> None:
         super().model_post_init(__context)
@@ -76,14 +76,14 @@ class EmbeddingRequestTemplate(RequestTemplate):
         for part in path.split("."):
             part = part.strip()
             if not part:
-                raise ConfigError("Request response_path contains an empty part")
+                raise ConfigError("Request path contains an empty part")
             tokens.append(part)
 
         if tokens and tokens[0] == "body":
             tokens = tokens[1:]
 
         if len(tokens) == 0:
-            raise ConfigError("Request text_path contains an empty part")
+            raise ConfigError("Request path is empty or contains only 'body'")
 
         return tuple(tokens)
 

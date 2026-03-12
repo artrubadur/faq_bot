@@ -9,7 +9,7 @@ from app.storage.base import Base
 from app.storage.models.user import Role, User
 from app.utils.state.data import update_data
 
-database_url = f"postgresql+asyncpg://{config.db_user}:{config.db_pass}@{config.db_host}:5432/{config.db_name}"
+database_url = f"postgresql+asyncpg://{config.db.user}:{config.db.password}@{config.db.host}:5432/{config.db.name}"
 engine = create_async_engine(database_url)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
@@ -23,7 +23,7 @@ async def init_db():
 
 
 async def sync_admin_roles():
-    admin_ids = set(config.tg_admins)
+    admin_ids = set(config.bot.admins)
 
     logger.debug(
         "Synchronizing admin access",

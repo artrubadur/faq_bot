@@ -13,7 +13,7 @@ class QuestionsService:
         new_embedding_service: EmbeddingService | None = None,
     ):
         self.repository = repository
-        self.max_distance = max_distance or (1 - config.qn_sim_threshold)
+        self.max_distance = max_distance or (1 - config.questions.sim_threshold)
         self.embedding_service = new_embedding_service or embedding_service
 
     async def create_question(
