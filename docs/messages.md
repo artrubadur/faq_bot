@@ -1,155 +1,92 @@
-# String Customization System
-## 0. Overview
+# Message Customization System
 
-This system provides a flexible mechanism for customizing all text strings used by the bot. Its primary purpose is **localization**, but it can also be used for other purposes such as:
-- Rebranding (changing terminology)
-- Adjusting tone and style
-- Quick text edits without code changes
+`messages.yml` controls user-visible texts, parse mode, formatting templates, and
+button labels.
 
-Field descriptions can be found in the [messages.example.yml](../config/messages.example.yml), which fully represents default values. **Note: The original default values apply emojis directly, you don't need `constants.example.yml` for launching without `messages.example.yml`.**
+Reference schema and default examples:
+[config/messages.example.yml](../config/messages.example.yml)
 
-## 1. Dynamic Variable Substitution
-All strings support dynamic variable insertion using curly braces `{variable_name}`. Variables are automatically replaced with actual values at runtime.
+## Loading Behavior
 
-**Example:**
-```yaml
-start: "Hello, {first_name}! I will help you find the answer"
-```
-When sent to a user named John, becomes: "Hello, John! I will help you find the answer"
+- File path comes from `PATHS__MESSAGES` (default: `./config/messages.yml`).
+- Missing file does not break startup; built-in defaults from Python models are
+  used.
+- Existing values override defaults selectively.
 
-## 2. Formatting Modes
-The `parse_mode` setting at the top of the file controls how text* is formatted:
-- `html` - Supports HTML tags
-- `markdown` - Supports Markdown formatting
-- `None` - Plain text only
+## Parse Mode
 
-Here's a comprehensive comparison table of HTML and Markdown formatting syntax based on the provided classes:
+Top-level `parse_mode` affects most outgoing messages:
 
-| Decoration | HTML | MarkDown | Result |
-|------------|------|----------|--------|
-| **Bold** | `<b>text</b>` | `**text**` | **text** |
-| **Italic** | `<i>text</i>` | `*text*` | *text* |
-| **Underline** | `<u>text</u>` | `__text__` | <u>text</u> |
-| **Strikethrough** | `<s>text</s>` | `~text~` | ~~text~~ |
-| **Spoiler** | `<tg-spoiler>text</tg-spoiler>` | `\|\|text\|\|` | ❄❄❄❄ |
-| **Code** | `<code>code</code>` | \`text\` | `code` |
-| **Pre (Code Block)** | `<pre>code</pre>` | \r```code```` | \```code```
-| **Pre with Language** | `<pre><code class="language-python">code</code></pre>` | \```\ntext\n\``` | ```
-| **Blockquote** | `<blockquote>line_1`<br>`line_2</blockquote>` | `>line_1`<br>`>line_2` | > line_1<br>> line_2 |
-| **Expandable Blockquote** | `<blockquote expandable>line_1`<br>`line_2</blockquote>` | `>line_1`<br>`>line_2\|\|` | > line_1<br>> line_2 \|\| |
-| **Link** | `<a href="https://text.ru">text</a>`<br> | `[text](https://text.ru)` | [text](https://example.com) |
-| **Mention/User or Channel Link** | `<a href="link**">@text</a>`<br>`<a href="link**">line_2</a>` | - | @text |
-| **Custom Emoji** | `<tg-emoji emoji-id="123"></tg-emoji>` | `![text](tg://emoji?id=123)` | (custom emoji) |
+- `html`
+- `markdown`
+- `null`
 
-### Notes:
-* *The parse mode also applies to [custom commands](commands.md).
-* **Possible mention links:
-  * `tg://user?id=*id*`
-  * `https://t.me/*user_or_channel_name*`
+This parse mode is also used by dynamic custom commands (see
+[commands.md](commands.md)).
 
-## 3. Variable Documentation
+## Variable Sources
 
-The system supports dynamic variable interpolation in text templates. Variables are enclosed in curly braces `{}` and are replaced with appropriate values at runtime.
+Templates use `{variable}` placeholders. Values come from:
 
-**Example:** `Hello, {first_name}!` will be replaced with the user's actual first name.
+1. **Runtime context** passed by handlers/dialogs.
+2. **Message context** for public user messages and custom commands:
+   - `id`, `first_name`, `last_name`, `username`, `full_name`, `date`
+3. **Constants** from `constants.yml` (resolved at startup time).
 
-### Message Context Variables
-
-The `message` variable is automatically available in all public message responses and contains the following user information:
-
-- `id` - Telegram user ID
-- `first_name` - User's first name
-- `last_name` - User's last name (may be empty)
-- `username` - Telegram username (may be empty)
-- `full_name` - Combined first and last name
-- `date` - Message date in format passed to `format.field.date`
-
-This applies only to the predefined public user interface (`responses.public`) and [custom commands](commands.md).
-
-### Identity Variable
-
-The `identity` variable represents a user identifier - it returns the username if available, otherwise falls back to the user ID. Used primarily in error messages and user references.
-
-**Example:** `User {identity} not found` might become "User @john_doe not found" or "User 123456789 not found".
-
-### Passed Variables
-
-Comments with `< variable` indicate which variables are passed to that specific message:
+Example:
 
 ```yaml
-successful: | # < user
-  {emoji.status.successful} User created:
-  {user}
+responses:
+  public:
+    start: "Hello, {first_name}. Date: {date}"
 ```
 
-In this example, the `user` variable (containing formatted user data) is available in the message.
+## Constants and Reserved Keys
 
-### Entity Formatting
+Constants can be used with dot-path placeholders, for example:
 
-Two main entities support structured formatting:
+- `{emoji.status.successful}`
+- `{brand.name}`
 
-- `user` - Formatted using `format.user` template
-- `question` - Formatted using `format.question` template
+First-level constant keys cannot use reserved runtime names such as:
 
-Individual fields within these entities are formatted using `format.field` templates:
+- `id`, `identity`, `user`, `question`, `exception`, `date`, `content`, `old`,
+  `new`, `page`, `max_page`, `rating`, `question_text`, `answer_text`
 
-```yaml
-user: # Complete user representation
-  id: "ID: {id}" # Uses format.field.id for the {id} part
-  username: "Username {username}" # Uses format.field.username for {username}
-```
+If a template references an unknown non-reserved field, startup validation fails.
 
-If a value passed to `format.field` is empty, the system falls back to `format.fallback` for that field.
+## Formatting Blocks
 
-### Button Variables
+`format.*` sections are reusable templates used by output helpers:
 
-Buttons use the `button.*` namespace and have their own variable handling:
+- `format.field.*`: primitive field formatting (id, username, rating, date, ...)
+- `format.user.*`: structured user rendering
+- `format.question.*`: structured question rendering
+- `format.edit.*`: update diff rendering
+- `format.fallback.*`: values used when fields are absent
 
-```yaml
-button:
-  user:
-    found: "Found ({identity})" # < identity
-```
+Buttons (`button.*`) use plain format substitution and are not passed through
+`format.field.*` helpers.
 
-Note: **`button.*` does not apply `format.field` formatting** - button text uses raw variable substitution only.
+## Runtime Context Conventions
 
-### Constants
+Many templates accept extra placeholders (for example `user`, `question`,
+`exception`, `identity`). In `messages.example.yml`, comments like
+`# < variable_name` document which values are passed by each call site.
 
-Constants are predefined values (e.g. emojis) defined in the configuration. **Important: Constants are resolved only once during system initialization and never change during runtime.** They can be referenced using dot notation:
+Use those comments as contract hints when editing text templates.
 
-**Examples:**
-- `{emoji.status.successful}` 
-- `{your.service.name}`
+## Error and Validation Routing
 
-Since constants are immutable after initialization, they provide consistent visual elements throughout the entire application lifecycle.
+Common routing behavior in the current implementation:
 
-### Variable Resolution and Errors
+- Public search failures use `responses.public.failed` with
+  `exceptions.search.not_found`.
+- Admin workflow validation/input errors use `responses.admin.invalid`.
+- Global unexpected errors in public handlers use `responses.public.error`.
 
-When resolving a variable, the system checks in this order:
-1. Constants (defined in the configuration and frozen at initialization)
-2. Runtime variables (passed to the specific message)
+## Best Practices
 
-If a variable does not exist in either runtime variables or constants, the system will raise an error. Constants cannot 
-
-If a variable does not exist in either runtime variables or constants, the system will raise an error. **Constants cannot override runtime variables** . The following reserved names cannot be used as constant names at the first nesting level as they would conflict with runtime variables: `identity`, `id`, `user`, `first_name`, `last_name`, `username`, `full_name`, `date`, `user_link`, `user_role`, `question`, `question_text`, `answer_text`, `rating`, `old`, `new`, `page`, `max_page`, `content`, `exception`.
-
-## 4. Routing
-
-### Error Message Routing
-Error messages are routed through different response channels depending on their source:
-
-- **`exceptions.search.not_found`** - Passed through `responses.public.failed` and shown to regular users when a search fails
-- **All other exceptions** - Passed through `responses.admin.invalid` and shown to administrators during operations
-
-### Validation Message Context
-
-Validation messages can appear in different contexts:
-
-- **`validation.question.question_text_long`** - Can be sent through either `failed` (for public users) or `invalid` (for administrators) depending on who triggered the validation
-
-### Question Input Processing Errors
-
-Question input validation has two specific error messages:
-
-- **`process.question.msg_question_text_invalid`** - Raised when a user sends a non-textual message (e.g., photo, video, sticker) instead of a text question
-- **`process.question.cmd_question_text_invalid`** - Raised when a user sends a command with an empty prompt (e.g., just `/ask` without any question text)
+- Keep placeholders unchanged unless you are sure the variable is provided.
+- Prefer editing copy in YAML rather than hardcoding text in Python.
+- When switching parse mode, recheck HTML/Markdown syntax across all templates.

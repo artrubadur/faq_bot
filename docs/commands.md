@@ -1,41 +1,89 @@
 # Custom Command System
 
-The system allows creating custom commands without writing code. Commands are defined in the configuration file using `key: value` format, where the key is the command name and the value is the bot's response.
+Custom commands let you add public Telegram commands without changing Python
+code. They are loaded from `config/commands.yml`.
 
-YOu can find simple example the [messages.example.yml](../config/messages.example.yml), which fully represents default values.
-
-## Multiline Commands
-
-For longer responses, use the multiline syntax with `|` or `>` character:
+## File Format
 
 ```yaml
 commands:
-  # `|` - Preserves line breaks
-  info: |
-    Line 1
-    Line 2
-  # Result:
-  # Line 1
-  # Line 2
-
-  # `>` - Folds into one line
-  help: >
-    Line 1
-    Line 2
-  # Result: Line 1 Line 2 Line 3
+  help: "Contact support at https://example.com"
+  about: |
+    Project: FAQ Bot
+    Version: 1
 ```
 
-### Variables
+- Key = command name (without `/`).
+- Value = response template.
 
-All [message fields](messages.md#message-context-variables) are available in custom commands:
+Reference example: [config/commands.example.yml](../config/commands.example.yml)
+
+## Reserved Command Names
+
+These commands are handled by the app and cannot be overridden in
+`config/commands.yml`:
+
+- `start`
+- `ask`
+- `goto`
+- `state`
+- `settings`
+- `error`
+
+## Variables and Formatting
+
+Custom command text supports runtime formatting with the same user context used
+for public responses:
+
+- `id`
+- `first_name`
+- `last_name`
+- `username`
+- `full_name`
+- `date`
+
+Example:
 
 ```yaml
 commands:
   profile: |
-    👤 Your Profile:
     ID: {id}
-    Name: {first_name}
+    Name: {full_name}
     Username: {username}
-    
-  time: "Current time: {date}"
+    Date: {date}
 ```
+
+Top-level `parse_mode` comes from `messages.yml` (`html`, `markdown`, or
+`null`).
+
+## Constants Support
+
+Placeholders from `constants.yml` are resolved during startup (same behavior as
+message templates). This is useful for static labels and symbols.
+
+## Multiline Tips
+
+Use YAML block operators:
+
+```yaml
+commands:
+  literal_lines: |
+    Line 1
+    Line 2
+
+  folded_lines: >
+    Line 1
+    Line 2
+```
+
+- `|` keeps line breaks.
+- `>` folds lines into a single paragraph.
+
+## Validation and Errors
+
+On startup, command config validation checks:
+
+- reserved command name usage
+- invalid placeholder references
+
+If validation fails, the bot will fail fast with a configuration error.

@@ -1,46 +1,89 @@
-# FinCubes FAQ Bot
-## Deploy
+# FAQ Bot
+
+Telegram FAQ bot with semantic search, pgvector-backed similarity lookup, and an
+admin UI for managing users and questions.
+
+## Features
+
+- Semantic question search using external embeddings.
+- PostgreSQL + pgvector storage for questions and embeddings.
+- Redis-backed temporary state with separate short and long TTL scopes.
+- Admin workflows for question/user CRUD, pagination, bans, and diagnostics.
+- Runtime text customization via YAML (`messages`, `constants`, `commands`).
+- Configurable rate limiting middleware.
+
+## Quick Start (Local)
+
+### 1. Prerequisites
+
+- Python 3.12
+- Poetry
+- PostgreSQL with `vector` extension (`pgvector`)
+- Redis
+
+### 2. Install dependencies
+
 ```bash
-py -m app.main
+poetry install
 ```
+
+### 3. Configure environment
+
 ```bash
-docker-compose up
+cp .env.example .env
 ```
-## Env
-```env
-PATHS__CONSTANTS="./config/constants.yml"
-PATHS__MESSAGES="./config/messages.yml"
-PATHS__COMMANDS="./config/commands.yml"
-PATHS__REQUESTS="./config/requests.yml"
 
-BOT__TOKEN=
-BOT__ADMINS=[]
+Configure your embedding API request format in `config/requests.yml` and update
+`.env` with real values for:
 
-DB__NAME=
-DB__USER=
-DB__PASSWORD=
-DB__HOST=
+- Telegram bot token
+- Database and Redis connection settings
+- Embedding provider credentials
+- Embedding vector dimension (`DB_SCHEMA__QUESTION_EMBEDDING_DIM`)
 
-REDIS__HOST=
-REDIS__PASSWORD=
-REDIS__LONG_TTL=86400
-REDIS__SHORT_TTL=300
+### 4. Start dependencies (if needed)
 
-RATE_LIMIT__ENABLED=True
-RATE_LIMIT__MAX_REQUESTS=5
-RATE_LIMIT__WINDOW=10
-RATE_LIMIT__SKIP_ADMIN=True
-
-QUESTIONS__SIMILAREST_THRESHOLD=0.7
-QUESTIONS__SIMILAR_THRESHOLD=0.4
-QUESTIONS__MAX_SIMILAR_AMOUNT=7
-QUESTIONS__MAX_POPULAR_AMOUNT=7
-QUESTIONS__MAX_AMOUNT=7
-
-REQUESTS__FOLDER_ID= 
-REQUESTS__IAM_TOKEN=
-
-DB_SCHEMA__QUESTION_TEXT_MAX_LEN=384
-DB_SCHEMA__ANSWER_TEXT_MAX_LEN=384
-DB_SCHEMA__QUESTION_EMBEDDING_DIM=
+```bash
+docker compose up -d db redis
 ```
+
+### 5. Run bot
+
+```bash
+poetry run python -m app.main
+```
+
+## Quick Start (Docker Compose)
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+This starts `db`, `redis`, and `bot`.
+
+## Command Reference
+
+### Public
+
+- `/start` - welcome message and registration in users table.
+- `/ask <question>` - semantic FAQ search.
+- Any plain text message - treated as a question.
+- Extra public commands from `config/commands.yml`.
+
+### Admin
+
+- `/settings` - open admin UI (users/questions CRUD + list).
+- `/ban <telegram_id>`
+- `/unban <telegram_id>`
+- `/state ...` - inspect and mutate FSM state.
+
+Admin routes require `admin` role and are controlled by `BOT__ADMINS` + DB role
+sync at startup.
+
+## Documentation
+
+- [Setup and Configuration](docs/setup-and-configuration.md)
+- [Architecture](docs/architecture.md)
+- [Messages Customization](docs/messages.md)
+- [Custom Commands](docs/commands.md)
