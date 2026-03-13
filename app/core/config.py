@@ -3,8 +3,6 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.core.exceptions import ConfigError
-
 
 class RequestsConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
@@ -37,6 +35,12 @@ class RedisConfig(BaseModel):
     short_ttl: int = 300
 
 
+class DBSchemaConfig(BaseModel):
+    question_text_max_len: int = Field(default=384, ge=1)
+    answer_text_max_len: int = Field(default=384, ge=1)
+    question_embedding_dim: int = Field(ge=1)
+
+
 class QuestionsConfig(BaseModel):
     similarest_threshold: float = Field(default=0.7, ge=0.0, le=1.0)
     similar_threshold: float = Field(default=0.4, ge=0.0, le=1.0)
@@ -47,13 +51,9 @@ class QuestionsConfig(BaseModel):
     @model_validator(mode="after")
     def validate_amount_limits(self) -> "QuestionsConfig":
         if self.max_similar_amount > self.max_amount:
-            raise ConfigError(
-                "'max_similar_amount' cannot be greater than 'max_amount'"
-            )
+            raise ValueError("'max_similar_amount' cannot be greater than 'max_amount'")
         if self.max_popular_amount > self.max_amount:
-            raise ConfigError(
-                "'max_popular_amount' cannot be greater than 'max_amount'"
-            )
+            raise ValueError("'max_popular_amount' cannot be greater than 'max_amount'")
         return self
 
 
@@ -78,6 +78,7 @@ class Config(BaseSettings):
     db: DBConfig
     redis: RedisConfig
     questions: QuestionsConfig = Field(default_factory=QuestionsConfig)
+    db_schema: DBSchemaConfig
     rate_limit: RateLimitConfig = Field(default_factory=RateLimitConfig)
 
 

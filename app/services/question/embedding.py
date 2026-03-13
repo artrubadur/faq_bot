@@ -7,7 +7,7 @@ class EmbeddingService:
     def __init__(self, new_client: EmbeddingClient | None = None) -> None:
         self.client = new_client or embedding_client
 
-    async def compute(self, text: str) -> tuple[float, ...]:
+    async def compute(self, text: str) -> list[float]:
         try:
             return await self.client.compute(text)
         except Exception as exc:

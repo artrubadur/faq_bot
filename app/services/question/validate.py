@@ -1,3 +1,4 @@
+from app.core.config import config
 from app.core.customization import messages
 
 
@@ -13,14 +14,14 @@ def validate_id(id: str | int) -> int:
 
 def validate_question_text(question_text: str) -> str:
     lenght = len(question_text)
-    if lenght > 384:
+    if lenght > config.db_schema.question_text_max_len:
         raise ValueError(messages.validation.question.question_text_long)
     return question_text
 
 
 def validate_answer_text(question_text: str) -> str:
     lenght = len(question_text)
-    if lenght > 384:
+    if lenght > config.db_schema.answer_text_max_len:
         raise ValueError(messages.validation.question.answer_text_long)
     return question_text
 

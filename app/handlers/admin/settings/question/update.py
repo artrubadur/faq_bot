@@ -34,7 +34,7 @@ from app.services.question.process import (
     process_rating_msg,
 )
 from app.services.question.service import QuestionsService
-from app.storage.core import async_session
+from app.storage.instance import async_session
 from app.storage.temp import TempContext
 from app.utils.history.last_message import LastMessage
 from app.utils.state import is_expired

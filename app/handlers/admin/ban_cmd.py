@@ -14,7 +14,7 @@ from app.dialogs.send.admin.misc import (
 from app.dialogs.send.common import send_access_denied
 from app.repositories import UsersRepository
 from app.services import UsersService
-from app.storage.core import async_session
+from app.storage.instance import async_session
 from app.storage.models.user import Role
 from app.utils.state import update_data
 

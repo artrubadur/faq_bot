@@ -13,7 +13,7 @@ from app.services.question.process import (
     process_question_text_msg,
 )
 from app.services.question.service import QuestionsService
-from app.storage.core import async_session
+from app.storage.instance import async_session
 
 router = Router()
 
@@ -30,7 +30,7 @@ async def process_ask_handler(
 
         suggestions, is_confident = await service.suggest_questions(
             question_text,
-            config.questions.max_simillar_amount,
+            config.questions.max_similar_amount,
             config.questions.max_popular_amount,
             config.questions.max_amount,
         )

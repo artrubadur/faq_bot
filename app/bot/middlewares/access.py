@@ -5,7 +5,7 @@ from sqlalchemy.exc import NoResultFound
 from app.handlers.common import banned_handler
 from app.repositories import UsersRepository
 from app.services import UsersService
-from app.storage.core import async_session
+from app.storage.instance import async_session
 from app.storage.models.user import Role
 from app.storage.temp import TempContext
 

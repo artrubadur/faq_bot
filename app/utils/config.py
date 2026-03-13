@@ -7,8 +7,6 @@ from pydantic_settings import (
 )
 from pydantic_settings_yaml import YamlBaseSettings
 
-from app.core.exceptions import ConfigError
-
 PYDANTIC_SYSTEM_KEYS = set(dir(BaseModel))
 
 
@@ -34,7 +32,7 @@ class DeepConvertMixin(BaseModel):
 
         for key, value in self.__pydantic_extra__.items():
             if key in reserved:
-                raise ConfigError(f"The key '{key}' is reserved by the system")
+                raise ValueError(f"The key '{key}' is reserved by the system")
 
             if isinstance(value, dict):
                 setattr(

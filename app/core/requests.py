@@ -4,7 +4,6 @@ from pydantic import BaseModel, ConfigDict, Field, PrivateAttr
 from pydantic_settings import SettingsConfigDict
 
 from app.core.config import config
-from app.core.exceptions import ConfigError
 from app.utils.config import YamlSettings
 
 
@@ -27,7 +26,7 @@ class RequestTemplate(BaseModel):
             return value.format(**request_vars)
         except KeyError as exc:
             missing = str(exc.args[0])
-            raise ConfigError(
+            raise ValueError(
                 f"Unknown request variable '{missing}' in '{section}.{key}'"
             )
 
@@ -76,14 +75,14 @@ class EmbeddingRequestTemplate(RequestTemplate):
         for part in path.split("."):
             part = part.strip()
             if not part:
-                raise ConfigError("Request path contains an empty part")
+                raise ValueError("Request path contains an empty part")
             tokens.append(part)
 
         if tokens and tokens[0] == "body":
             tokens = tokens[1:]
 
         if len(tokens) == 0:
-            raise ConfigError("Request path is empty or contains only 'body'")
+            raise ValueError("Request path is empty or contains only 'body'")
 
         return tuple(tokens)
 
@@ -109,7 +108,7 @@ class EmbeddingRequestTemplate(RequestTemplate):
             try:
                 current = current[token]
             except (KeyError, IndexError, TypeError) as exc:
-                raise ConfigError(
+                raise ValueError(
                     f"Failed to extract embedding_path '{self.embedding_path}' at token '{token}'"
                 ) from exc
         return current

@@ -16,7 +16,7 @@ from app.dialogs.send.common import send_invalid
 from app.repositories import UsersRepository
 from app.services import UsersService
 from app.services.user.process import process_identity_msg
-from app.storage.core import async_session
+from app.storage.instance import async_session
 from app.storage.temp import TempContext
 from app.utils.history.last_message import LastMessage
 

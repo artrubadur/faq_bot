@@ -14,13 +14,14 @@ from app.core import commands_status, constants_status, messages_status, request
 from app.core.config import config
 from app.core.logging.setup import setup_logging
 from app.handlers import admin_router, common_router, public_router
-from app.storage.core import close_db, init_db, sync_admin_roles
+from app.services.user.admin_sync import sync_admin_roles
+from app.storage.core import close_db, init_db
 
 
 async def startup():
     setup_logging(config.paths.logging)
     await init_db()
-    await sync_admin_roles()
+    await sync_admin_roles(config.bot.admins)
 
     logger.info(messages_status)
     logger.info(constants_status)

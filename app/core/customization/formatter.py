@@ -1,7 +1,5 @@
 from string import Formatter
 
-from app.core.exceptions import ConfigError
-
 
 class SafeFormatter(Formatter):
     def __init__(self, allowed_extra: list[str] = []):
@@ -13,7 +11,7 @@ class SafeFormatter(Formatter):
             return super().get_value(key, args, kwargs)
         except (KeyError, AttributeError) as exc:
             if key not in self.allowed_extra:
-                raise ConfigError(
+                raise ValueError(
                     f"Attempt to access a non-existent field: {key}"
                 ) from exc
             return "{" + str(key) + "}"

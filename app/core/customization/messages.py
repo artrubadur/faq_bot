@@ -6,7 +6,6 @@ from pydantic_settings import SettingsConfigDict
 from app.core.config import config
 from app.core.customization.constants import BOT_SYSTEM_KEYS, constants
 from app.core.customization.formatter import SafeFormatter
-from app.core.exceptions import ConfigError
 from app.utils.config import YamlSettings
 
 # Responses
@@ -394,7 +393,7 @@ class Messages(YamlSettings):
                         obj, **constants.model_extra
                     )  # pyright: ignore[reportCallIssue]
                 except AttributeError as exc:
-                    raise ConfigError(
+                    raise ValueError(
                         f"Attempt to access a non-existent constant: {obj}"
                     ) from exc
             for field, value in obj.items():

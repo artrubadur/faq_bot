@@ -6,6 +6,7 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import Row, cast, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import config
 from app.storage.models import Question
 
 
@@ -22,7 +23,7 @@ class QuestionsRepository:
         self.session = session
 
     async def create(
-        self, question_text: str, answer_text: str, embedding: tuple[float, ...]
+        self, question_text: str, answer_text: str, embedding: list[float]
     ) -> Question:
         new_question = Question(
             question_text=question_text, answer_text=answer_text, embedding=embedding
@@ -65,12 +66,12 @@ class QuestionsRepository:
 
     async def get_similar(
         self,
-        embedding: tuple[float, ...],
+        embedding: list[float],
         *,
         limit: int,
         max_distance: float = 1,
     ) -> Sequence[Row[Tuple[Question, float]]]:
-        embedding_vec = cast(embedding, Vector(256))
+        embedding_vec = cast(embedding, Vector(config.db_schema.question_embedding_dim))
         distance = func.cosine_distance(Question.embedding, embedding_vec)
 
         result = await self.session.execute(

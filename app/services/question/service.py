@@ -9,16 +9,16 @@ class QuestionsService:
     def __init__(
         self,
         repository: QuestionsRepository,
-        simillarest_distance: float | None = None,
-        simillar_distance: float | None = None,
+        similarest_distance: float | None = None,
+        similar_distance: float | None = None,
         new_embedding_service: EmbeddingService | None = None,
     ):
         self.repository = repository
-        self.simillarest_distance = simillarest_distance or (
-            1 - config.questions.simillarest_threshold
+        self.similarest_distance = similarest_distance or (
+            1 - config.questions.similarest_threshold
         )
-        self.simillar_distance = simillar_distance or (
-            1 - config.questions.simillar_threshold
+        self.similar_distance = similar_distance or (
+            1 - config.questions.similar_threshold
         )
         self.embedding_service = new_embedding_service or embedding_service
 
@@ -29,7 +29,7 @@ class QuestionsService:
 
         if check_similarity:
             row = await self.repository.get_similar(
-                embedding=embedding, limit=1, max_distance=self.simillarest_distance
+                embedding=embedding, limit=1, max_distance=self.similarest_distance
             )
             if len(row) > 0:
                 similar, distance = row[0]
@@ -71,7 +71,7 @@ class QuestionsService:
         rows = await self.repository.get_similar(
             embedding=embedding,
             limit=amount,
-            max_distance=self.simillar_distance,
+            max_distance=self.similar_distance,
         )
 
         questions: list[Question] = [row[0] for row in rows]
@@ -80,7 +80,7 @@ class QuestionsService:
         if similarities:
             sim1 = similarities[0]
             sim2 = similarities[1] if len(similarities) > 1 else 0.0
-            threshold = config.questions.simillarest_threshold
+            threshold = config.questions.similarest_threshold
 
             if (
                 sim1 >= threshold - 1e-6
@@ -111,12 +111,12 @@ class QuestionsService:
     async def suggest_questions(
         self,
         question_text: str,
-        max_simillar_amount: int,
+        max_similar_amount: int,
         max_popular_amount: int,
         max_amount: int,
     ) -> tuple[list[Question], bool]:
         similar, similarities = await self._get_similar_questions(
-            question_text, max_simillar_amount + 1
+            question_text, max_similar_amount + 1
         )
 
         popular_amount = min(max_amount - len(similar), max_popular_amount)
@@ -124,7 +124,7 @@ class QuestionsService:
         suggestions = similar + popular
         is_confident = (
             len(similarities) != 0
-            and similarities[0] >= config.questions.simillarest_threshold
+            and similarities[0] >= config.questions.similarest_threshold
         )
 
         return suggestions, is_confident

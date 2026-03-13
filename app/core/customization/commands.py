@@ -4,7 +4,6 @@ from pydantic_settings import SettingsConfigDict
 from app.core.config import config
 from app.core.customization.constants import BOT_SYSTEM_KEYS, constants
 from app.core.customization.formatter import SafeFormatter
-from app.core.exceptions import ConfigError
 from app.utils.config import YamlSettings
 
 SYSTEM_COMMANDS = {"start", "ask", "goto", "state", "settings", "error"}
@@ -23,7 +22,7 @@ class Commands(YamlSettings):
                     value, **constants.model_extra
                 )  # pyright: ignore[reportCallIssue]
             except AttributeError as exc:
-                raise ConfigError(
+                raise ValueError(
                     f"Attempt to access a non-existent constant: {value}"
                 ) from exc
 
@@ -33,12 +32,12 @@ class Commands(YamlSettings):
     def validate_commands(cls, commands: dict[str, str]) -> dict[str, str]:
         inter = SYSTEM_COMMANDS & set(commands.keys())
         if "start" in inter:
-            raise ConfigError(
+            raise ValueError(
                 "The start command must be specified in the 'PATH__COMMANDS' file"
             )
         if len(inter) > 0:
             commands_str = ", ".join([f"'{command}'" for command in commands])
-            raise ConfigError(f"{commands_str} cannot be changed")
+            raise ValueError(f"{commands_str} cannot be changed")
 
         return commands
 

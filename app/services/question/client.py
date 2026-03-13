@@ -15,11 +15,11 @@ class EmbeddingClient:
         self.template = template or request_templates.embedding
         self.timeout = timeout
 
-    async def compute(self, text: str) -> tuple[float, ...]:
+    async def compute(self, text: str) -> list[float]:
         request_data = self.template.build(text)
         response_data = await asyncio.to_thread(self._send_request, request_data)
         embedding = self.template.extract(response_data)
-        return tuple(float(value) for value in embedding)
+        return [float(value) for value in embedding]
 
     def _send_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         response = requests.request(
