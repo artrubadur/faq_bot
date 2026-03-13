@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "faq_bot"
-version = "0.1.0"
+version = "1.0.0"
 description = ""
 authors = ["artrubadur"]
 package-mode = false
@@ -14,7 +14,6 @@ pgvector = "^0.4.2"
 asyncpg = "^0.31.0"
 pydantic = "^2.12.5"
 pydantic-settings = "^2.12.0"
-yandex-cloud-ml-sdk = "^0.17.1"
 pyyaml = "^6.0.3"
 loguru = "^0.7.3"
 pydantic-settings-yaml = "^0.2.0"
